@@ -10,3 +10,4 @@ fi
 export CURRENT=$(pwd)
 export FORGE_PATH=~/Temp/dev/forge/bin
 $FORGE_PATH/forge -e "run ../scripts/cdstore-forge.fsh"
+cd ..
