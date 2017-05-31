@@ -1,0 +1,1114 @@
+:sectanchors:
+:toc: macro
+:toclevels: 2
+:toc-title: Table of Content
+:numbered:
+
+= Hands On Lab with Spring Boot & OpenShift
+
+toc::[]
+
+# Prerequisites
+
+you will need to install the following on your machine:
+
+- [x] http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html[JDK 1.8]
+- [x] http://maven.apache.org/download.cgi[Maven 3.3.6 or higher]
+- [x] http://www.virtualbox.org/wiki/Downloads[Virtualbox 5.0 or higher]
+- [x] http://github.com/minishift/minishift[Minishift v1.0.1]
+- [x] http://github.com/openshift/origin/releases/tag/v1.4.1[OpenShift Client 1.4.1]
+- [x] http://forge.jboss.org/download[JBoss Forge]
+- [x] http://developers.redhat.com/products/devstudio/download/?referrer=jbd[JBoss Developer Studio 10 (optional)]
+
+# Installation of OpenShift
+
+In order to use OpenShift platform on your laptop, we will use the Minishift Go clientApplication which has been created from the Minikube project of Kubernetes. It extends the features proposed by the Kubernetes client to package/deploy
+OpenShift within a VM machine. Different hypervisors are supported as Virtualbox, xhyve & VMWare. You can find more information about Minishift like also how to install it from the project:
+https://github.com/minishift/minishift
+
+We will configure the VM on the machine using Virtualbox as Hypervisor, the version of OpenShift used is `1.4.1`. It is the default verison used by minishift 1.0.0.Beta3
+To create the Virtual Machine, open a Terminal and execute this command.
+
+[source]
+----
+minishift start --memory=4000 --vm-driver=virtualbox
+
+Starting local OpenShift instance using 'virtualbox' hypervisor...
+Provisioning OpenShift via '/Users/chmoulli/.minishift/cache/oc/v1.4.0-rc1/oc [cluster up --use-existing-config --host-config-dir /var/lib/minishift/openshift.local.config --host-data-dir /var/lib/minishift/hostdata]'
+-- Checking OpenShift client ... OK
+-- Checking Docker client ... OK
+-- Checking Docker version ... OK
+-- Checking for existing OpenShift container ...
+   Deleted existing OpenShift container
+-- Checking for openshift/origin:v1.4.0-rc1 image ... OK
+-- Checking Docker daemon configuration ... OK
+-- Checking for available ports ... OK
+-- Checking type of volume mount ...
+   Using Docker shared volumes for OpenShift volumes
+-- Creating host directories ... OK
+-- Finding server IP ...
+   Using 192.168.64.25 as the server IP
+-- Starting OpenShift container ...
+   Starting OpenShift using container 'origin'
+   Waiting for API server to start listening
+   OpenShift server started
+-- Removing temporary directory ... OK
+-- Server Information ...
+   OpenShift server started.
+   The server is accessible via web console at:
+       https://192.168.99.101:8443
+
+   To login as administrator:
+       oc login -u system:admin
+----
+
+Next, we will provide more rights for the admin `default` user in order to let it to access the different projects/namespaces to manage the resources.
+This step is only required if you use the new Minishift client (>= 1.0.0.Beta3).
+
+You can retrieve the provate address of the VM using the `minishift ip` command.
+
+[source]
+----
+oc login https://$(minishift ip):8443 -u system:admin
+oc adm policy add-cluster-role-to-user cluster-admin admin
+oc login -u admin -p admin
+oc project default
+----
+
+Remark : Optionally you can install OpenShift templates in order to have more examples to play on the platform as WildFly Server, MongoDb, MySQL Server, ...
+
+[source]
+----
+export currentDir=$(pwd)
+cd $TEMP_DIR
+git clone https://github.com/openshift/openshift-ansible.git
+cd openshift-ansible/roles/openshift_examples/files/examples/latest/
+for f in image-streams/image-streams-centos7.json; do cat $f | oc create -n openshift -f -; done
+for f in db-templates/*.json; do cat $f | oc create -n openshift -f -; done
+for f in quickstart-templates/*.json; do cat $f | oc create -n openshift -f -; done
+cd $currentDir
+----
+
+# Configuration of JBoss Forge
+
+In order to use JBoss Forge with this lab, 2 addons should be installed to be able to setup Spring Boot and Fabric8
+
+[source]
+----
+brew install jboss-forge
+forge -e "addon-install --coordinate io.fabric8.forge:devops,2.3.88"
+forge -e "addon-install --coordinate org.jboss.forge.addon:wildfly-swarm,2017.1.1"
+----
+
+# Goals
+
+The goal of this lab is to :
+
+- Create a Microservices Java application that we will deploy within a virtualized environment managed by OpenShift,
+- Externalize the configuration using https://kubernetes.io/docs/user-guide/configmap/[Kubernetes Config Map],
+- Package/Deploy the project in OpenShift,
+- Simplify the development of the application using JBoss Forge technology
+- Implements the circuit broker pattern
+
+The project will contain 3 modules; a web static Front end, a backend service exposed by the Spring Boot Java Container & a MySQL database.
+The JPA layer is managed by Hibernate with the help of the module WildFly JPA. The front end is a AngularJS application.
+
+Each module will be packaged and deployed as a Docker image on OpenShift. The OpenShift Source to Image Tool (= https://docs.openshift.com/enterprise/3.2/creating_images/s2i.html[S2I]) will be used for that purpose.
+It will use the Java S2I Docker image responsible to build the final Docker image of your project using the source code of the maven module uploaded to the openshift platform.
+This step will be performed using the https://maven.fabric8.io/[Fabric8 Maven Plugin]. This Maven plugin is a Java Kubernetes/OpenShift client able to communicate with the OpenShift platform using the REST endpoints
+in order to issue the commands allowing to build aproject, deploy it and finally launch a docker process as a pod.
+
+The project will be developed using Java IDE Tool like "IntelliJ, JBoss Developer Studio" while the JBoss Forge tool will help us to design the Java application, add the required dependencies,
+ populate the Hibernate in order to:
+
+- Create the REST Service
+- Modelize the JPA Entity & the model
+- Scaffold the AngularJS application
+
+# Project creation
+
+We will follow the following steps in order to create the maven project containing the modules of our application. Some prerequisites are required like JBoss Forge.
+The first thing to be done is to git clone locally the project
+
+. Open a terminal where we will create the snowcamp project
+. Git clone the project
+  git clone https://github.com/redhat-microservices/lab_swarm-openshift.git
+. Change to the director yof the cloned git repo
+  cd lab_swarm-openshift
+
+## All in one
+
+The following script (if you want) can help you to setup partially the  project in one step. We invite you to first look to the decomposed steps in order to build the project step-by-step before
+to use it.
+
+[source]
+----
+cd scripts
+ ./setup.sh
+----
+
+## Decomposed steps
+
+### Parent project
+
+Within the git cloned project, create a project snowcamp using maven archetype:generate plugin
+
+. Create the parent maven project
++
+[source]
+----
+mvn archetype:generate -DarchetypeGroupId=org.codehaus.mojo.archetypes \
+                       -DarchetypeArtifactId=pom-root \
+                       -DarchetypeVersion=RELEASE \
+                       -DinteractiveMode=false \
+                       -DgroupId=org.cdstore \
+                       -DartifactId=project \
+                       -Dversion=1.0.0-SNAPSHOT
+mv project snowcamp && cd snowcamp
+----
+
+The following pom file will be created
++
+[source]
+----
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.cdstore</groupId>
+  <artifactId>project</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>project</name>
+</project>
+----
+
+### Catalog CD project
+
+. Next create the `cdservice` maven module using the following JBoss Forge command. As this project is a Java EE project, we will pass as parameter to JBoss Forge the
+  stack to be used which is Java_EE_7. JBoss Forge will create a new maven module, configure the pom.xml file.
+  The following command must be executed within the Forge shell or by passing the command using this convention
+  `forge -e "..."` where `...` corresponds to a Forge command.
++
+[source]
+----
+project-new --named cdservice --stack JAVA_EE_7
+----
+
+. Setup the JPA project where the provider used is `Hibernate`, the database `MYSQL` which corresponds to the dialect to be configured within the persistence file of Hibernate.
+  Specify also the datasource and the persistent-unit name. All these parameters will be used by the Forge addon to populate the file persistence.xml under the directory META-INF.
+  The command should be executed within the `cdservice` folder.
++
+[source]
+----
+jpa-setup --configure-metadata --jpa-provider hibernate \
+          --db-type MYSQL \
+          --data-source-name java:jboss/datasources/CatalogDS \
+          --persistence-unit-name cdservice-persistence-unit
+----
+
+Remark : The parameter `--configure-metadata` will tell to Forge to include within the pom.xml the Hibernate Maven plugin responsible to generate the classes from the Entity class
+         like the persistence.xml file.
+
+. Create a Catalog Java (but also entity) class where the fields will be defined as such. It is not required to define the field with the PRIMARY key as it will be created
+  by default by the JBoss Forge command.
++
+[source]
+----
+jpa-new-entity --named Catalog
+jpa-new-field --named artist --target-entity org.cdservice.model.Catalog
+jpa-new-field --named title --target-entity org.cdservice.model.Catalog
+jpa-new-field --named description --length 2000 --target-entity org.cdservice.model.Catalog
+jpa-new-field --named price --type java.lang.Float --target-entity org.cdservice.model.Catalog
+jpa-new-field --named publicationDate --type java.util.Date --temporalType DATE --target-entity org.cdservice.model.Catalog
+----
+
+. As we target to communicate with a MySQL Database, the mysql JDBC Java driver should be added to the pom definition of the `cdservice` module
+  using this command
++
+[source]
+----
+project-add-dependencies mysql:mysql-connector-java:5.1.40
+----
+
+. As we would like to expose our Catalog of CDs as a Service published behind as a REST endpoint, we will use another JBoss Forge command responsible
+  to create a RestApplication and the Rest Service ("CatalogEndpoint.class").
++
+[source]
+----
+rest-generate-endpoints-from-entities --targets org.cdservice.model.*
+----
+
+. We are almost set. The last step of this module section will consist to use this JBoss Forge scaffold command.
+  This command will populate the Web Front end which is a JavaScript AngularJS 1 project. This Front contains the screens
+  required to perform the CRUD operations by calling the REST service `http://myservice.com/rest/catalogs`
++
+[source]
+----
+scaffold-setup --provider AngularJS
+scaffold-generate --provider AngularJS --generate-rest-resources --targets org.cdservice.model.*
+----
+
+. As we want that our `cdservice` can be bootstrapped using the Spring Boot Java Microservices container, we will issue this JBoss Forge command
+  which will setup the maven module as a Spring Boot project and will scan the project to detect the fractions to be included (Datasource, ...)
++
+[source]
+----
+wildfly-swarm-setup
+wildfly-swarm-detect-fractions --depend --build
+----
+
+. As the service will be called from a resources which is not running from the same HTTP Server and domain, a REST filter should be created to add the CORS Headers
++
+[source]
+----
+rest-new-cross-origin-resource-sharing-filter
+----
+
+. Now, we will add the Fabric8 Maven Plugin and configure the pom.xml file. This Fabric8 Maven plugin is our client to communicate with the OpenShift platform.
+  Issue this command.
++
+[source]
+----
+fabric8-setup
+----
+
+. As the JBoss Fabric Forge Addon used will create a project using the latest version of the Fabric8 plugin which hasn't been tested for this lab,
+  we will change the version of the Fabric8 Maven plugin from 3.2.9 to 3.1.92 like also specify the generator to be used.
+  Add the generator wildfly-swarm that we will use.
++
+[source]
+----
+<plugin>
+   <groupId>io.fabric8</groupId>
+   <artifactId>fabric8-maven-plugin</artifactId>
+   <version>3.1.92</version>
+   <executions>
+     <execution>
+       <id>fmp</id>
+       <goals>
+         <goal>resource</goal>
+         <goal>build</goal>
+       </goals>
+     </execution>
+   </executions>
+   <configuration>
+     <generator>
+       <includes>
+         <include>wildfly-swarm</include>
+       </includes>
+     </generator>
+   </configuration>
+ </plugin>
+----
+
+### Configure the datasource
+
+. To be able to use the project locally but also on OpenShift, we will define 2 datasources and JDBC drivers to use either a H2 in-memory
+  database which doesn't required any installation of a database or MySQL that we will install in OpenShift.
+. Add a folder `src/main/config` containing a `project-stages.yaml` file. This file will contain the definition of the datasources
+  that Spring Boot will use when Hibernate to try to call the database.
++
+[source]
+----
+mkdir -p src/main/config
+touch src/main/config/project-stages.yaml
+----
+
+. Configure the datasource to use the H2 in-memory database with `ExampleDS` as datasource name
++
+[source]
+----
+cat << 'EOF' > src/main/config/project-stages.yaml
+swarm:
+  datasources:
+    data-sources:
+      ExampleDS:
+        driver-name: h2
+        connection-url: jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+        user-name: sa
+        password: sa
+EOF
+----
+
+. Next, copy/paste the `persistence.xml` file which has been created by the JBoss Forge command `jpa-setup` under the folder `src/main/config/META-INF`
++
+[source]
+----
+mkdir -p src/main/config/META-INF/
+cp src/main/resources/META-INF/persistence.xml src/main/config/META-INF/persistence.xml
+----
+
+. Change the datasource name like the dialect to be used
+  within the persistence file.
++
+[source]
+----
+<jta-data-source>java:jboss/datasources/ExampleDS</jta-data-source>
+...
+<property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
+----
+
+. Define a maven profile within the `pom.xml` file where we will tell to maven to copy the `src/main/config` content to the target folder `src/main/resources`
+  when the project will be compiled. Declare also the h2 database dependency. This dependency will be detected by Spring Boot when the server will be started
+  and by consequence this H2 JDBC Driver will be used.
++
+[source]
+----
+<profile>
+  <id>local</id>
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/config</directory>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+    </resources>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>1.4.192</version>
+    </dependency>
+  </dependencies>
+</profile>
+----
+
+. Create a new configuration directory `src/main/config-openshift` where we will configure what will be deployed on OpenShift.
+. Move the `persistence.xml` file from the `src/main/resources` directory to another target directory `src/main/config-openshift/META-INF`
++
+[source]
+----
+mkdir -p src/main/config-openshift/META-INF
+mv src/main/resources/META-INF/persistence.xml src/main/config-openshift/META-INF/persistence.xml
+----
+
+. Create another profile called `openshift`
++
+[source]
+----
+<profile>
+  <id>openshift</id>
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/config-openshift</directory>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+    </resources>
+  </build>
+</profile>
+----
+
+. Move the `MySQL Maven dependency` from the pom.xml within the `openshift` profile as the MySQL database will only be used when the project will be deployed on OpenShift.
++
+[source]
+----
+...
+<profile>
+...
+<dependencies>
+  <dependency>
+    <groupId>mysql</groupId>
+    <artifactId>mysql-connector-java</artifactId>
+  </dependency>
+</dependencies>
+</profile>
+----
+
+. To have a subset of data available within the database, copy the import.sql file to the `src/main/config` and `src/main/config-openshift` folders of your project.
+. Move to the `snowcamp` parent folder.
++
+[source]
+----
+cd ..
+cp ../scripts/service/import.sql cdservice/src/main/config
+cp ../scripts/service/import.sql cdservice/src/main/config-openshift
+----
+
+. We can now build the project to be validate that it is in order.
++
+[source]
+----
+mvn compile
+mvn clean compile -Plocal
+mvn clean compile -Popenshift
+----
+
+### Store Front end
+
+. It is time now to create the store front project & setup Spring Boot. We will specify the HTTP Container to be used which is here Undertow.
+. Execute the following JBoss Forge command within the `snowcamp` folder.
++
+[source]
+----
+project-new --named cdfront --stack JAVA_EE_7 --type wildfly-swarm --http-port 8081
+wildfly-swarm-add-fraction --fractions undertow
+----
+
+. The `org.cdfront.rest.HelloWorldEndpoint.java` class created by the Swarm Forge command can be deleted as we will not use it
++
+[source]
+----
+rm -rf cdfront/src/main/java/org/cdfront/rest/*
+----
+
+. As the web content has been created/populated previously, we will move the Web resources from the `cdservice` to the `cdfront` project.
++
+[source]
+----
+mv cdservice/src/main/webapp/ cdfront/src/main/
+mkdir -p cdservice/src/main/webapp/WEB-INF
+----
+
+. Setup this project as Fabric8 using the corresponding JBoss Forge command within the `cdfront` folder.
++
+[source]
+----
+cd cdfront
+fabric8-setup
+----
+
+. Change the version of the Fabric8 Maven plugin as we did before from 3.2.9 to 3.1.92
+. Add the generator wildfly-swarm that we will use
++
+[source]
+----
+<plugin>
+  <groupId>io.fabric8</groupId>
+  <artifactId>fabric8-maven-plugin</artifactId>
+  <version>3.1.92</version>
+  <executions>
+    <execution>
+      <id>fmp</id>
+      <goals>
+        <goal>resource</goal>
+        <goal>build</goal>
+      </goals>
+    </execution>
+  </executions>
+  <configuration>
+    <generator>
+      <includes>
+        <include>wildfly-swarm</include>
+      </includes>
+    </generator>
+  </configuration>
+</plugin>
+----
+
+. Change the address of the `cdservice` http server that the front will access. Edit the file src/main/webapp/scripts/services/CatalogFactory.js and
+  add the address
++
+[source]
+----
+var resource = $resource('http://localhost:8080/rest/catalogs/:CatalogId' .....
+----
+
+## Build and deploy
+
+### Build and run locally
+
+. Open 2 terminal in order to start the front & backend
+. cd `cdservice`
+
+  mvn clean compile wildfly-swarm:run -Plocal
+
+. cd `cdfront`
+
+  mvn wildfly-swarm:run
+
+. Open the project within your browser `http://localhost:8081/index.html`
+
+### Deploy on OpenShift
+
+### Setup My SQL Database
+
+. Verify first that you are well connected to `OpenShift`
+
+  oc status
+
+. Create the snowcamp namespace/project
+
+  oc new-project snowcamp
+
+. Create the MySQL application using the OpenShift MySQL Template
++
+[source]
+----
+oc new-app --template=mysql-ephemeral \
+    -p MYSQL_USER=mysql \
+    -p MYSQL_PASSWORD=mysql \
+    -p MYSQL_DATABASE=catalogdb
+----
+
+. Next, check if the Database is up and alive
++
+[source]
+----
+export pod=$(oc get pod | grep mysql | awk '{print $1}')
+oc rsh $pod
+mysql -u $MYSQL_USER -p$MYSQL_PASSWORD -h $HOSTNAME $MYSQL_DATABASE
+
+mysql> connect catalogdb;
+Connection id:    1628
+Current database: catalogdb
+
+mysql> SELECT t.* FROM catalogdb.Catalog t;
+ERROR 1146 (42S02): Table 'catalogdb.Catalog' doesn't exist
+----
+
+Remark: As we haven't yet deployed the service, the Catalog DB hasn't been yet created.
+
+### Externalize the Datasource
+
+To avoid to package the `project-stages.yml` file containing the definition of the datasource within the uber jar file used by Spring Boot to launch
+the Web Server, we will externalize this file and mount it as a volume to the pod/docker container when it will be created. This process will require
+ to define a file containing the definition of the Volume to be mounted and the key of the value to be fetch from an internal cache managed by the Kubernetes
+ platform which is called `configMap`. The ConfigMap that we will create for this project will help us to define the content of the `project-stages.yml`.
+ These files will be created manually as no tool is available to generate them and will be placed in a directory which is scanned by the Fabric8 Maven
+ plugin when the project is build and deployed on OpenShift.
+
+. Create under the directory `src/main/fabric8` of the `cdservice` maven module the `configmap.yml` file which contains the definition of the project-stages.yml.
++
+[source]
+----
+cd cdservice
+mkdir -p src/main/fabric8
+touch src/main/fabric8/configmap.yml
+
+cat << 'EOF' > src/main/fabric8/configmap.yml
+metadata:
+  name: ${project.artifactId}
+data:
+  project-stages.yml: |-
+    swarm:
+      datasources:
+        data-sources:
+          CatalogDS:
+            driver-name: mysql
+            connection-url: jdbc:mysql://mysql:3306/catalogdb
+            user-name: mysql
+            password: mysql
+EOF
+----
+
+Remark: As you can see, the hostname defined for the connection-url corresponds also to the `mysql` service published on OpenShift (`oc get svc/mysql`).
+This name will be resolved by the internal DNS server exposed by OpenShift when the application will issue a request to this machine.
+
+. In order to expose our docker container created by Kubernetes as pod, we will create a `svc.yml`. The content of this file will be used
+  by Kubernetes to expose using its Api Gateway a service using the specified port. The targetPort allows to map the docker port with the targetPort
+  exposed by the Api.
+. Add a `svc.yml` under the `src/main/fabric8` folder where the target port is 8080 in order to create a service
++
+[source]
+----
+touch src/main/fabric8/svc.yml
+
+cat << 'EOF' > src/main/fabric8/svc.yml
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${project.artifactId}
+spec:
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
+EOF
+----
+
+. As this service is only visible and accessible inside the Virtual Machine, we will use the HAProxy deployed by OpenShift to route the traffic from the host the the VM.
+  Create a `route.yml` file under the `src/main/fabric8` to tell to OpenShift to create a route and specifies the target port which is `8080`
++
+[source]
+----
+touch src/main/fabric8/route.yml
+
+cat << 'EOF' > src/main/fabric8/route.yml
+apiVersion: v1
+kind: Route
+metadata:
+  name: ${project.artifactId}
+spec:
+  port:
+    targetPort: 8080
+  to:
+    kind: Service
+    name: ${project.artifactId}
+EOF
+----
+
+. Map the configMap to a volume that OpenShift will mount/attach to the pod when it will be created.
+  Create a `deploymentconfig.yml` file in order to specify to Kubernetes how the pod could be created (= from a Docker Image),
+  the ENV variables needed, volume to be attached and where it could resolve the key containing the content
++
+[source]
+----
+touch src/main/fabric8/deploymentconfig.yml
+
+cat << 'EOF' > src/main/fabric8/deploymentconfig.yml
+apiVersion: "v1"
+kind: "DeploymentConfig"
+metadata:
+  name: "cdservice"
+spec:
+  replicas: 1
+  selector:
+    project: "cdservice"
+    provider: "fabric8"
+    group: "org.cdservice"
+  strategy:
+    rollingParams:
+      timeoutSeconds: 10800
+    type: "Rolling"
+  template:
+    spec:
+      containers:
+      - env:
+        - name: "KUBERNETES_NAMESPACE"
+          valueFrom:
+            fieldRef:
+              fieldPath: "metadata.namespace"
+        - name: "AB_JOLOKIA_OFF"
+          value: "true"
+        - name: "JAVA_APP_DIR"
+          value: "/deployments"
+        - name: "AB_OFF"
+          value: "true"
+        - name: "JAVA_OPTIONS"
+          value: "-Dswarm.project.stage.file=file:///app/config/project-stages.yml"
+        image: "cdservice:latest"
+        imagePullPolicy: "IfNotPresent"
+        name: "wildfly-swarm"
+        ports:
+        - containerPort: 8080
+          name: "http"
+          protocol: "TCP"
+        - containerPort: 9779
+          name: "prometheus"
+          protocol: "TCP"
+        - containerPort: 8778
+          name: "jolokia"
+          protocol: "TCP"
+        securityContext:
+          privileged: false
+        volumeMounts:
+          - name: config
+            mountPath: /app/config
+      volumes:
+        - configMap:
+            name: ${project.artifactId}
+            items:
+            - key: "project-stages.yml"
+              path: "project-stages.yml"
+          name: config
+  triggers:
+  - type: "ConfigChange"
+  - imageChangeParams:
+      automatic: true
+      containerNames:
+      - "wildfly-swarm"
+      from:
+        kind: "ImageStreamTag"
+        name: "cdservice:latest"
+    type: "ImageChange"
+EOF
+----
+
+Remark : The location of the `project-stages.yml` file to be used by Spring Boot is passed as JAVA_OPTIONS parameter
+
+. Deploy the `cdservice` project on OpenShift using this maven instruction
++
+[source]
+----
+mvn clean fabric8:deploy -Popenshift
+----
+
+. Check that you can access the REST endpoint of the service using this curl request format `http://CDSERVICE_ROUTE/rest/catalogs`.
+
+  curl http://cdservice-snowcamp.192.168.99.100.xip.io/rest/catalogs
+
+Remark : you can retrieve the route address to access your service using this oc client command `oc get route/cdservice`
+
+### Externalize Front Service
+
+The URL to access the service will be specified within a `settings.json` file that the AngularJS framework will load when the service `/catalogs`
+will be called. The file isn't mounted as a volume attached to the pod but that could be done using the same mechanism as presented before.
+
+. Create a `service.json` file under webapp folder of the cd front project & define the following key/value where the HOST address corresponds to the IP address used
+  by your VM machine
++
+[source]
+----
+cd cdfront
+touch src/main/webapp/service.json
+
+cat << 'EOF' > src/main/webapp/service.json
+{ "cd-service": "http://cdservice-snowcamp.MY_HOST_IP_ADDRESS.xip.io/rest/catalogs/" }
+EOF
+----
+
+. Change the `MY_HOST_IP_ADDRESS` key with the value of the private IP address of your virtual machine
+. Create this `config.js` file within the directory scripts containing a $http.get request to access the content
+  of the json file & fetch the key `cd-service`. This key will contain the hostname or service name to be accessed
+
+[source]
+----
+touch src/main/webapp/scripts/services/config.js
+
+cat << 'EOF' > src/main/webapp/scripts/services/config.js
+angular.module('cdservice').factory('config', function ($http, $q) {
+  var deferred = $q.defer();
+  var apiUrl = null;
+  $http.get("service.json")
+    .success(function (data) {
+      console.log("Resource : " + data['cd-service'] + ':CatalogId');
+      deferred.resolve(data['cd-service']);
+      apiUrl = data['cd-service'];
+    })
+    .error(function () {
+      deferred.reject('could not find service.json ....');
+    });
+
+  return {
+    promise: deferred.promise,
+    getApiUrl: function () {
+      return apiUrl;
+    }
+  };
+});
+EOF
+----
+
+. Modify the `scripts/services/CatalogFactory.js` to use the function `config` instead of the hard coded value
+
+[source]
+----
+angular.module('cdservice').factory('CatalogResource', function ($resource, config) {
+  return $resource(config.getApiUrl() + ':CatalogId', { CatalogId: '@id' }, {
+    'queryAll': {
+      method: 'GET',
+      isArray: true
+    }, 'query': { method: 'GET', isArray: false }, 'update': { method: 'PUT' }
+  });
+});
+----
+
+. Update the routeProvider of the `app.js` script to access the service & setup a promise function as the call is asynchronous
+[source]
+----
+...
+.when('/Catalogs',
+{
+  templateUrl:'views/Catalog/search.html',
+  controller:'SearchCatalogController',
+  resolve: {
+      apiUrl: function(config) {
+        return config.promise;
+      }
+    }
+})
+...
+----
+
+. Edit the app.html page to add the new script externalizing the URL
+
+    <script src="scripts/services/config.js"></script>
+
+. As we will deploy the CD Front project as a Service that we will route externally from the host machine, we will create 2 OpenShift objects;
+  one to configure the service exposed by the Kubernetes Api (gateway) and the other to configure the HA Proxy how to access the service from the host machine
+. Add a `svc.yml` under the `src/main/fabric8` folder where the target port is 8081 in order to create a service.
++
+[source]
+----
+mkdir -p src/main/fabric8/
+touch src/main/fabric8/svc.yml
+
+cat << 'EOF' > src/main/fabric8/svc.yml
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${project.artifactId}
+spec:
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8081
+  type: ClusterIP
+EOF
+----
+
+. Create a `route.yml` file under the `src/main/fabric8` to tell to OpenShift to create a route
++
+[source]
+----
+touch src/main/fabric8/route.yml
+
+cat << 'EOF' > src/main/fabric8/route.yml
+apiVersion: v1
+kind: Route
+metadata:
+  name: ${project.artifactId}
+spec:
+  port:
+    targetPort: 8081
+  to:
+    kind: Service
+    name: ${project.artifactId}
+EOF
+----
+
+. Deploy the cd front project
++
+[source]
+----
+mvn fabric8:deploy
+----
+
+. Check that you can access the HTML page of the Front. Remark : you can get the route address using the command `oc get route/cdfront-snowcamp`
+
+  http://cdfront-snowcamp.MY_HOST_IP_ADDRESS.xip.io/
+
+. Change the `MY_HOST_IP_ADDRESS` key with the value of the private IP address of your virtual machine
+. Open your browser and verifies that you can access the Front and consult the CDs collection.
+
+## Enable circuit breaker
+
+Within this section, we will implement the circuit breaker pattern using the NetFlix OSS Hystrix project. The breaker will be developed within
+our CatalogEnpoint in order to send a dummy record to the front if the database is not longer available. We will extend the `cdservice` project
+to support this pattern by adding first an HystrixCommand and next to register it within the Endpoint class. The command contains 2 methods `run()` and `fallback()`
+which are used by the HystrixServlet with the help of the Java observable pattern. The method run will be called regularly to check if we get a response from the MySQL database,
+if this is the case, the fallback method will be called. The information (= events or hearbeat messages) created, are published by Hystrix within a server called
+Turbine where the role is to collect but also to aggregate the information. It also allows to graphically display what happen within the different circuit breakers deployed.
+
+. Setup a Turbine server which is responsible to collect the events pushed by the Hystrix Commands
++
+[source]
+----
+oc create -f http://repo1.maven.org/maven2/io/fabric8/kubeflix/turbine-server/1.0.28/turbine-server-1.0.28-openshift.yml
+oc policy add-role-to-user admin system:serviceaccount:snowcamp:turbine
+oc expose service turbine-server
+----
+
+. Then deply a Hystrix Web dashboard from where we can consult the events published by the Turbine server and check if some strange happened.
++
+[source]
+----
+oc create -f http://repo1.maven.org/maven2/io/fabric8/kubeflix/hystrix-dashboard/1.0.28/hystrix-dashboard-1.0.28-openshift.yml
+oc expose service hystrix-dashboard --port=8080
+----
+
+. Add Spring Boot Hystrix dependency to the pom.xml of the `cdservice` (pom.xml) project in order to get the Hystrix Java classes
++
+[source]
+----
+<dependency>
+    <groupId>org.wildfly.swarm</groupId>
+    <artifactId>hystrix</artifactId>
+</dependency>
+----
+
+. Add Hystrix enabled label to the service definition (src/main/fabric8/svc.yml) as this label will be used by the Fabric Hystrix pod to collect thge info.
++
+[source]
+----
+metadata:
+  labels:
+    hystrix.enabled: true
+----
+
+. Create a Hystrix command class by extending the `HystrixCommand` classto where you will define the run and fallback methods.
+. Register the command under the Group Key `CatalogGroup`
+. Return a list of catalog within the `run()` method.
+. Populate a dummy record within the `fallback()` method.
++
+[source]
+----
+touch src/main/java/org/cdservice/model/GetCatalogListCommand.java
+
+cat << 'EOF' > src/main/java/org/cdservice/model/GetCatalogListCommand.java
+package org.cdservice.model;
+
+import com.netflix.hystrix.HystrixCommand;
+import com.netflix.hystrix.HystrixCommandGroupKey;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import java.util.Collections;
+import java.util.List;
+
+public class GetCatalogListCommand extends HystrixCommand<List> {
+    private final EntityManager em;
+    private final Integer startPosition;
+    private final Integer maxResult;
+
+    public GetCatalogListCommand(EntityManager em, Integer startPosition, Integer maxResult) {
+        super(HystrixCommandGroupKey.Factory.asKey("CatalogGroup"));
+        this.em = em;
+        this.startPosition = startPosition;
+        this.maxResult = maxResult;
+    }
+    public List<Catalog> run() {
+        TypedQuery<Catalog> findAllQuery = em
+                .createQuery("SELECT DISTINCT c FROM Catalog c ORDER BY c.id", Catalog.class);
+        if (startPosition != null) {
+            findAllQuery.setFirstResult(startPosition);
+        }
+        if (maxResult != null) {
+            findAllQuery.setMaxResults(maxResult);
+        }
+        return findAllQuery.getResultList();
+    }
+    public List<Catalog> getFallback() {
+        Catalog catalog = new Catalog();
+        catalog.setArtist("Fallback");
+        catalog.setTitle("This is a circuit breaker");
+        return Collections.singletonList(catalog);
+    }
+}
+EOF
+----
+
+. Register the GetCatalogListCommand within the `src/main/java/org/cdservice/rest/CatalogEndpoint.java` class in order to access the Circuit Break or let's say to enable it.
++
+[source]
+----
+import org.cdservice.model.GetCatalogListCommand;
+
+@GET
+@Produces("application/json")
+public List<Catalog> listAll(@QueryParam("start") Integer startPosition,
+			@QueryParam("max") Integer maxResult) {
+   return new GetCatalogListCommand(em, startPosition, maxResult).execute();
+}
+----
+
+. Compile the `cdservice` and redeploy the modified `cdservice` pod on OpenShift.
++
+[source]
+----
+mvn clean fabric8:deploy -Popenshift
+----
+
+. Scale down the database, to see circuit breaker fallback.
++
+[source]
+----
+oc scale --replicas=0 dc mysql
+----
+
+. Refresh the CD Front and click on the `catalog` button. A record will be displayed with the info `This is a fallback record`
+
+You can read more about Hystrix https://github.com/Netflix/Hystrix/wiki/How-it-Works[here].
+
+## Tricks
+
+### Access MySQL DB
+
+You can use the MySQL database running in OpenShift from your local machine if you forward the traffic from the service of the MySQL Database to the host using `port-forwarding` command
+
+[source]
+----
+export pod=$(oc get pod | grep mysql | awk '{print $1}')
+oc port-forward $pod 3306:3306
+----
+
+### Add records
+
+In case you want to create some new records or add yours, use this SQL query to insert CD records (if the table has been created !)
+
+[source]
+----
+INSERT INTO Catalog (id, version, artist, description, price, publicationDate, title) VALUES (1001, 1, 'ACDC', 'Australian hard rock band', 15.0, '1980-07-25', 'Back in Black');
+INSERT INTO Catalog (id, version, artist, description, price, publicationDate, title) VALUES (1002, 1, 'Abba', 'Swedish pop music group', 12.0, '1976-10-11', 'Arrival');
+INSERT INTO Catalog (id, version, artist, description, price, publicationDate, title) VALUES (1003, 1, 'Coldplay', 'British rock band ', 17.0, '2008-07-12', 'Viva la Vida');
+INSERT INTO Catalog (id, version, artist, description, price, publicationDate, title) VALUES (1004, 1, 'U2', 'Irish rock band ', 18.0, '1987-03-09', 'The Joshua Tree');
+INSERT INTO Catalog (id, version, artist, description, price, publicationDate, title) VALUES (1005, 1, 'Metallica', 'Heavy metal band', 15.0, '1991-08-12', 'Black');
+----
+
+### Using Maven property & ENV
+
+. Add a maven property `cdfront.url` where the value corresponds to a key `${backend.url}`
++
+[source]
+----
+ <cdfront.url>${backend.url}</cdfront.url>
+----
+
+. Create a folder `resources` containing a copy of the `scripts/services/CatalogFactory.js` file
++
+[source]
+----
+mkdir -p resources/scripts/services
+cp src/main/webapp/scripts/services/CatalogFactory.js resources/scripts/services
+----
+
+. Change this line of code `':CatalogId'` to include as prefix the maven property to be filtered
++
+[source]
+----
+sed -i -e "s|\:CatalogId|\$\{cdfront.url\}\:CatalogId|g" resources/scripts/services/CatalogFactory.js
+----
+
+. Configure the Maven War plugin to filter the resource
++
+[source]
+----
+<plugin>
+  <artifactId>maven-war-plugin</artifactId>
+  <configuration>
+    <webResources>
+      <resource>
+        <filtering>true</filtering>
+        <directory>resources</directory>
+      </resource>
+    </webResources>
+  </configuration>
+</plugin>
+----
+
+. Run the project locally and passing the backend.url as property
++
+[source]
+----
+mvn clean package -Dbackend.url=http://localhost:8080/rest/catalogs/
+----
+
+. configure the MAVEN_ARGS env var of the Java S2I Build image
++
+[source]
+----
+cat << 'EOF' > src/main/fabric8/deploymentconfig.yml
+apiVersion: "v1"
+kind: "DeploymentConfig"
+metadata:
+  name: "cdfront"
+spec:
+  template:
+    spec:
+      containers:
+      - env:
+        - name: "KUBERNETES_NAMESPACE"
+          valueFrom:
+            fieldRef:
+              fieldPath: "metadata.namespace"
+        - name: "MAVEN_ARGS"
+          value: "-Dbackend.url=http://localhost:8080/rest/catalogs/"
+        name: "wildfly-swarm"
+  triggers:
+  - type: "ConfigChange"
+  - imageChangeParams:
+      automatic: true
+      containerNames:
+      - "wildfly-swarm"
+      from:
+        kind: "ImageStreamTag"
+        name: "cdfront:latest"
+    type: "ImageChange"
+EOF
+----
