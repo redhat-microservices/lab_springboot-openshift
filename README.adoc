@@ -28,18 +28,21 @@ https://github.com/minishift/minishift
 
 To create the Virtual Machine, open a Terminal and execute this command to create it using VirtualBox as Hypervisor. The memory allocated to the instance and required is `3Gb`
 
-NOTE: IF you have installed xhyve on your laptop, you can remove the `--vm-driver` parameter from the command line
+NOTE: If you have installed xhyve on your laptop, you can remove the `--vm-driver` parameter from the command line
 
 [source]
 ----
-minishift start --memory=3000 --vm-driver=virtualbox
+minishift config set memory 3000
+minishift config set vm-driver virtualbox
+
+minishift start
 Starting local OpenShift cluster using 'virtualbox' hypervisor...
 -- Checking OpenShift client ... OK
 -- Checking Docker client ... OK
 -- Checking Docker version ... OK
 -- Checking for existing OpenShift container ... OK
--- Checking for openshift/origin:v1.5.0 image ...
-   Pulling image openshift/origin:v1.5.0
+-- Checking for openshift/origin:v1.5.1 image ...
+   Pulling image openshift/origin:v1.5.1
    Pulled 0/3 layers, 3% complete
    Pulled 0/3 layers, 46% complete
    Pulled 1/3 layers, 75% complete
@@ -139,11 +142,11 @@ The project will be developed using Java IDE Tool like "IntelliJ, JBoss Develope
 We will follow the following steps in order to create the maven project containing the modules of our application. Some prerequisites are required like JBoss Forge.
 The first thing to be done is to git clone locally the project
 
-. Open a terminal where we will create the snowcamp project
+. Open a terminal where we will create the workshop project
 . Git clone the project
-  git clone https://github.com/redhat-microservices/lab_swarm-openshift.git
+  git clone https://github.com/redhat-microservices/lab_springboot-openshift.git
 . Change to the director yof the cloned git repo
-  cd lab_swarm-openshift
+  cd lab_springboot-openshift
 
 ## All in one
 
@@ -160,7 +163,7 @@ cd scripts
 
 ### Parent project
 
-Within the git cloned project, create a project snowcamp using maven archetype:generate plugin
+Within the git cloned project, create a project workshop using maven archetype:generate plugin
 
 . Create the parent maven project
 +
@@ -173,7 +176,7 @@ mvn archetype:generate -DarchetypeGroupId=org.codehaus.mojo.archetypes \
                        -DgroupId=org.cdstore \
                        -DartifactId=project \
                        -Dversion=1.0.0-SNAPSHOT
-mv project snowcamp && cd snowcamp
+mv project workshop && cd workshop
 ----
 
 The following pom file will be created
@@ -194,13 +197,13 @@ The following pom file will be created
 ### Catalog CD project
 
 . Next create the `cdservice` maven module using the following JBoss Forge command. As this project is a Java EE project, we will pass as parameter to JBoss Forge the
-  stack to be used which is Java_EE_7. JBoss Forge will create a new maven module, configure the pom.xml file.
+  stack to be used which is `spring-boot`. JBoss Forge will create a new maven module, configure the pom.xml file.
   The following command must be executed within the Forge shell or by passing the command using this convention
   `forge -e "..."` where `...` corresponds to a Forge command.
 +
 [source]
 ----
-project-new --named cdservice --stack JAVA_EE_7
+project-new --named cdservice --type spring-boot --spring-boot-version 1.4.6
 ----
 
 . Setup the JPA project where the provider used is `Hibernate`, the database `MYSQL` which corresponds to the dialect to be configured within the persistence file of Hibernate.
@@ -209,10 +212,7 @@ project-new --named cdservice --stack JAVA_EE_7
 +
 [source]
 ----
-jpa-setup --configure-metadata --jpa-provider hibernate \
-          --db-type MYSQL \
-          --data-source-name java:jboss/datasources/CatalogDS \
-          --persistence-unit-name cdservice-persistence-unit
+jpa-setup --db-type H2 --data-source-name java:jboss/datasources/CatalogDS
 ----
 
 Remark : The parameter `--configure-metadata` will tell to Forge to include within the pom.xml the Hibernate Maven plugin responsible to generate the classes from the Entity class
@@ -229,14 +229,6 @@ jpa-new-field --named title --target-entity org.cdservice.model.Catalog
 jpa-new-field --named description --length 2000 --target-entity org.cdservice.model.Catalog
 jpa-new-field --named price --type java.lang.Float --target-entity org.cdservice.model.Catalog
 jpa-new-field --named publicationDate --type java.util.Date --temporalType DATE --target-entity org.cdservice.model.Catalog
-----
-
-. As we target to communicate with a MySQL Database, the mysql JDBC Java driver should be added to the pom definition of the `cdservice` module
-  using this command
-+
-[source]
-----
-project-add-dependencies mysql:mysql-connector-java:5.1.40
 ----
 
 . As we would like to expose our Catalog of CDs as a Service published behind as a REST endpoint, we will use another JBoss Forge command responsible
@@ -430,7 +422,7 @@ mv src/main/resources/META-INF/persistence.xml src/main/config-openshift/META-IN
 ----
 
 . To have a subset of data available within the database, copy the import.sql file to the `src/main/config` and `src/main/config-openshift` folders of your project.
-. Move to the `snowcamp` parent folder.
+. Move to the `workshop` parent folder.
 +
 [source]
 ----
@@ -451,7 +443,7 @@ mvn clean compile -Popenshift
 ### Store Front end
 
 . It is time now to create the store front project & setup Spring Boot. We will specify the HTTP Container to be used which is here Undertow.
-. Execute the following JBoss Forge command within the `snowcamp` folder.
+. Execute the following JBoss Forge command within the `workshop` folder.
 +
 [source]
 ----
@@ -541,9 +533,9 @@ var resource = $resource('http://localhost:8080/rest/catalogs/:CatalogId' .....
 
   oc status
 
-. Create the snowcamp namespace/project
+. Create the workshop namespace/project
 
-  oc new-project snowcamp
+  oc new-project workshop
 
 . Create the MySQL application using the OpenShift MySQL Template
 +
@@ -741,7 +733,7 @@ mvn clean fabric8:deploy -Popenshift
 
 . Check that you can access the REST endpoint of the service using this curl request format `http://CDSERVICE_ROUTE/rest/catalogs`.
 
-  curl http://cdservice-snowcamp.192.168.99.100.xip.io/rest/catalogs
+  curl http://cdservice-workshop.192.168.99.100.xip.io/rest/catalogs
 
 Remark : you can retrieve the route address to access your service using this oc client command `oc get route/cdservice`
 
