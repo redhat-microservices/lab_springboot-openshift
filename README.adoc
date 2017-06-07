@@ -17,8 +17,8 @@ you will need to install the following on your machine:
 - [x] http://www.virtualbox.org/wiki/Downloads[Virtualbox 5.0 or higher]
 - [x] https://github.com/minishift/minishift/releases/tag/v1.1.0[Minishift v1.1.0]
 - [x] http://forge.jboss.org/download[JBoss Forge]
-- [] http://developers.redhat.com/products/devstudio/download/?referrer=jbd[JBoss Developer Studio 10 (optional)]
-- [] http://github.com/openshift/origin/releases/tag/v1.5.0[OpenShift Client 1.5.0 (optional)]
+- [x] http://developers.redhat.com/products/devstudio/download/?referrer=jbd[JBoss Developer Studio 10 (optional)]
+- [x] http://github.com/openshift/origin/releases/tag/v1.5.0[OpenShift Client 1.5.0 (optional)]
 
 # Installation of OpenShift
 
@@ -26,12 +26,13 @@ In order to use OpenShift platform on your laptop, we will use the Minishift Go 
 OpenShift within a VM machine. Different hypervisors are supported as Virtualbox, xhyve & VMWare. You can find more information about Minishift like also how to install it from the project:
 https://github.com/minishift/minishift
 
-We will configure the VM on the machine using Virtualbox as Hypervisor, the version of OpenShift used is `1.4.1`. It is the default verison used by minishift 1.0.0.Beta3
-To create the Virtual Machine, open a Terminal and execute this command.
+To create the Virtual Machine, open a Terminal and execute this command to create it using VirtualBox as Hypervisor. The memory allocated to the instance and required is `3Gb`
+
+NOTE: IF you have installed xhyve on your laptop, you can remove the `--vm-driver` parameter from the command line
 
 [source]
 ----
-minishift start --memory=4000 --vm-driver=virtualbox
+minishift start --memory=3000 --vm-driver=virtualbox
 Starting local OpenShift cluster using 'virtualbox' hypervisor...
 -- Checking OpenShift client ... OK
 -- Checking Docker client ... OK
@@ -96,7 +97,7 @@ oc login -u admin -p admin
 oc project default
 ----
 
-# Configuration of JBoss Forge
+# Configuration of JBoss Forge tool
 
 In order to use JBoss Forge with this lab, 2 addons should be installed to be able to create a Spring Boot project and deploy it on the OpenShift platform
 using the Fabric8 maven plugin
