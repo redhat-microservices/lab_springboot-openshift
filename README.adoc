@@ -525,11 +525,11 @@ var resource = $resource('http://localhost:8080/rest/catalogs/:CatalogId' .....
 . Open 2 terminal in order to start the front & backend
 . cd `cdservice`
 
-  mvn clean compile wildfly-swarm:run -Plocal
+  mvn clean compile spring-boot:run -Plocal
 
 . cd `cdfront`
 
-  mvn wildfly-swarm:run
+  mvn spring-boot:run
 
 . Open the project within your browser `http://localhost:8081/index.html`
 
