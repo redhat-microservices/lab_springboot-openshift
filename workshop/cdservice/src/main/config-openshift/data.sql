@@ -1,0 +1,5 @@
+INSERT INTO Catalog (id, version, artist, description, price, publication_date, title) VALUES (1001, 1, 'ACDC', 'Australian hard rock band', 15.0, '1980-07-25', 'Back in Black');
+INSERT INTO Catalog (id, version, artist, description, price, publication_date, title) VALUES (1002, 1, 'Abba', 'Swedish pop music group', 12.0, '1976-10-11', 'Arrival');
+INSERT INTO Catalog (id, version, artist, description, price, publication_date, title) VALUES (1003, 1, 'Coldplay', 'British rock band ', 17.0, '2008-07-12', 'Viva la Vida');
+INSERT INTO Catalog (id, version, artist, description, price, publication_date, title) VALUES (1004, 1, 'U2', 'Irish rock band ', 18.0, '1987-03-09', 'The Joshua Tree');
+INSERT INTO Catalog (id, version, artist, description, price, publication_date, title) VALUES (1005, 1, 'Metallica', 'Heavy metal band', 15.0, '1991-08-12', 'Black');
