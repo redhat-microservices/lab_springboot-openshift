@@ -453,8 +453,7 @@ rm -rf cdfront/src/main/java/org/cdfront/rest/*
 +
 [source]
 ----
-mv cdservice/src/main/webapp/ cdfront/src/main/
-mkdir -p cdservice/src/main/webapp/WEB-INF
+mv cdservice/src/main/webapp/ cdfront/src/main/resources/static
 ----
 
 . Setup this project as Fabric8 using the corresponding JBoss Forge command within the `cdfront` folder.
@@ -483,17 +482,10 @@ fabric8-setup
       </goals>
     </execution>
   </executions>
-  <configuration>
-    <generator>
-      <includes>
-        <include>wildfly-swarm</include>
-      </includes>
-    </generator>
-  </configuration>
 </plugin>
 ----
 
-. Change the address of the `cdservice` http server that the front will access. Edit the file src/main/webapp/scripts/services/CatalogFactory.js and
+. Change the address of the `cdservice` http server that the front will access. Edit the file src/main/resources/static/scripts/services/CatalogFactory.js and
   add the address
 +
 [source]
