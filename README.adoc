@@ -166,7 +166,7 @@ cd scripts
 
 ### Parent project
 
-Within the git cloned project, create a project workshop using maven archetype:generate plugin
+Within the git cloned project, create a project named `workshop` using the maven `archetype:generate` plugin
 
 . Create the parent maven project
 +
@@ -182,7 +182,7 @@ mvn archetype:generate -DarchetypeGroupId=org.codehaus.mojo.archetypes \
 mv project workshop && cd workshop
 ----
 
-The following pom file will be created
+. The following pom file will be created
 +
 [source]
 ----
