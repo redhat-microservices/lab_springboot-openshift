@@ -224,8 +224,7 @@ spring.jpa.properties.hibernate.transaction.flush_before_completion=true
 spring.jpa.properties.hibernate.format_sql=true
 spring.jpa.properties.hibernate.hbm2ddl.auto=create-drop
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect
----
-
+----
 
 . Create a Catalog Java (but also entity) class where the fields will be defined as such. It is not required to define the field with the PRIMARY key as it will be created
   by default by the JBoss Forge command.
