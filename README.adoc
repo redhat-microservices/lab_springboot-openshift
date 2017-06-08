@@ -249,15 +249,6 @@ scaffold-setup --provider AngularJS
 scaffold-generate --provider AngularJS --generate-rest-resources --targets org.cdservice.model.*
 ----
 
-. As we want that our `cdservice` can be bootstrapped using the Spring Boot Java Microservices container, we will issue this JBoss Forge command
-  which will setup the maven module as a Spring Boot project and will scan the project to detect the fractions to be included (Datasource, ...)
-+
-[source]
-----
-wildfly-swarm-setup
-wildfly-swarm-detect-fractions --depend --build
-----
-
 . As the service will be called from a resources which is not running from the same HTTP Server and domain, a REST filter should be created to add the CORS Headers
 +
 [source]
