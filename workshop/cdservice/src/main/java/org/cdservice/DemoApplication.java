@@ -12,7 +12,6 @@ public class DemoApplication {
 		SpringApplication.run(DemoApplication.class, args);
 	}
 
-
 	@Bean
 	public JacksonJsonProvider Config() {
 		return new JacksonJsonProvider();
