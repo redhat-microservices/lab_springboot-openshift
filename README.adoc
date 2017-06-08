@@ -284,39 +284,6 @@ public class DemoApplication {
 	}
 ----
 
-TODO : Verify latest modifications of Christophe
-
-. We are almost set. The last step of this module section will consist to use this JBoss Forge scaffold command.
-  This command will populate the static Web content which is an AngularJS 1 application. This Frontend contains the screens
-  required to perform the CRUD operations to call the REST services `http://localhost:8080/rest/catalogs`
-+
-[source]
-----
-mkdir -p ../cdfront/src/main/resources/static
-scaffold-setup --provider AngularJS --web-root ../../../../cdfront/src/main/resources/static
-scaffold-generate --provider AngularJS --generate-rest-resources --targets org.cdservice.model.* --web-root ../../../../cdfront/src/main/resources/static
-----
-
-. Create within the `cdfront` folder a `WEB-INF` directory containing the following web.xml content. It contains the file to be used as Welcome page !
-+
-[source,xml]
-----
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.0" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
-  <display-name>cdservice</display-name>
-  <session-config>
-    <session-timeout>30</session-timeout>
-  </session-config>
-  <mime-mapping>
-    <extension>ico</extension>
-    <mime-type>image/x-icon</mime-type>
-  </mime-mapping>
-  <welcome-file-list>
-    <welcome-file>/index.html</welcome-file>
-  </welcome-file-list>
-</web-app>
-----
-
 . As the service will be called from a resources which is not running from the same HTTP Server and domain, a REST filter should be created to add the CORS Headers
 +
 [source]
@@ -472,10 +439,57 @@ mvn clean compile -Popenshift
 +
 [source]
 ----
-project-new --named cdfront --overwrite --type jar
+project-new --named cdfront --type jar
 ----
 
 . Transform it into a Spring Boot project
++
+[source]
+----
+spring-boot-new-project --dependencies web
+----
+
+. Change the port number to be use by editing the application.properties file and adding this key
++
+[source]
+----
+server.port=8081
+----
+
+. Generate the static content using the REST endpoints defined within the cdservice project
+
+TODO : Verify latest modifications of Christophe
+
+. We are almost set. The last step of this module section will consist to use this JBoss Forge scaffold command.
+  This command will populate the static Web content which is an AngularJS 1 application. This Frontend contains the screens
+  required to perform the CRUD operations to call the REST services `http://localhost:8080/rest/catalogs`
++
+[source]
+----
+mkdir -p cdfront/src/main/resources/static
+scaffold-setup --provider AngularJS --web-root ../../../../cdfront/src/main/resources/static
+scaffold-generate --provider AngularJS --generate-rest-resources --targets org.cdservice.model.* --web-root ../../../../cdfront/src/main/resources/static
+----
+
+. Create within the `cdfront` folder a `WEB-INF` directory containing the following web.xml content. It contains the file to be used as Welcome page !
++
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.0" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+  <display-name>cdservice</display-name>
+  <session-config>
+    <session-timeout>30</session-timeout>
+  </session-config>
+  <mime-mapping>
+    <extension>ico</extension>
+    <mime-type>image/x-icon</mime-type>
+  </mime-mapping>
+  <welcome-file-list>
+    <welcome-file>/index.html</welcome-file>
+  </welcome-file-list>
+</web-app>
+----
 
 . Setup this project as Fabric8 using the corresponding JBoss Forge command within the `cdfront` folder.
 +
