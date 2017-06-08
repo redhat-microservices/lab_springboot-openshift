@@ -142,14 +142,16 @@ The project will be developed using Java IDE Tool like "IntelliJ, JBoss Develope
 We will follow the following steps in order to create the maven project containing the modules of our application. Some prerequisites are required like JBoss Forge.
 The first thing to be done is to git clone locally the project
 
-. Open a terminal where we will create the workshop project
+. Open a terminal where you will create the `workshop` project
 . Git clone the project
   +
   [source]
   ----
   git clone https://github.com/redhat-microservices/lab_springboot-openshift.git
   ----
+
 . Change to the directory of the cloned git repository
+
   cd `lab_springboot-openshift`
 
 ## All in one
