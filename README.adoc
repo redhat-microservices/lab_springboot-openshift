@@ -522,7 +522,7 @@ var resource = $resource('http://localhost:8080/rest/catalogs/:CatalogId' .....
 +
 [source]
 ----
-oc new-app --template=mysql-ephemeral \
+oc new-app --template=mysql-persistent \
     -p MYSQL_USER=mysql \
     -p MYSQL_PASSWORD=mysql \
     -p MYSQL_DATABASE=catalogdb
@@ -544,7 +544,7 @@ mysql> SELECT t.* FROM catalogdb.Catalog t;
 ERROR 1146 (42S02): Table 'catalogdb.Catalog' doesn't exist
 ----
 
-Remark: As we haven't yet deployed the service, the Catalog DB hasn't been yet created.
+Remark: As we haven't yet deployed the service, the Catalog DB hasn't been yet created by the Hibernate framework.
 
 ### Externalize the Datasource
 
@@ -555,6 +555,7 @@ the Web Server, we will externalize this file and mount it as a volume to the po
  These files will be created manually as no tool is available to generate them and will be placed in a directory which is scanned by the Fabric8 Maven
  plugin when the project is build and deployed on OpenShift.
 
+. Copy the content of the application.properties file within the config.yaml file to be created (see hereafter) and next delete it
 . Create under the directory `src/main/fabric8` of the `cdservice` maven module the `configmap.yml` file which contains the definition of the project-stages.yml.
 +
 [source]
@@ -567,15 +568,19 @@ cat << 'EOF' > src/main/fabric8/configmap.yml
 metadata:
   name: ${project.artifactId}
 data:
-  project-stages.yml: |-
-    swarm:
-      datasources:
-        data-sources:
-          CatalogDS:
-            driver-name: mysql
-            connection-url: jdbc:mysql://mysql:3306/catalogdb
-            user-name: mysql
-            password: mysql
+  application.properties: |-
+    cxf.jaxrs.component-scan=true
+    cxf.path=/rest
+
+    spring.datasource.url=jdbc\:mysql\://mysql\:3306/catalogdb
+    spring.datasource.username=mysql
+    spring.datasource.password=mysql
+
+    spring.jpa.properties.hibernate.transaction.flush_before_completion=true
+    spring.jpa.properties.hibernate.show_sql=true
+    spring.jpa.properties.hibernate.format_sql=true
+    spring.jpa.properties.hibernate.hbm2ddl.auto=create-drop
+    spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
 EOF
 ----
 
@@ -626,85 +631,6 @@ spec:
 EOF
 ----
 
-. Map the configMap to a volume that OpenShift will mount/attach to the pod when it will be created.
-  Create a `deploymentconfig.yml` file in order to specify to Kubernetes how the pod could be created (= from a Docker Image),
-  the ENV variables needed, volume to be attached and where it could resolve the key containing the content
-+
-[source]
-----
-touch src/main/fabric8/deploymentconfig.yml
-
-cat << 'EOF' > src/main/fabric8/deploymentconfig.yml
-apiVersion: "v1"
-kind: "DeploymentConfig"
-metadata:
-  name: "cdservice"
-spec:
-  replicas: 1
-  selector:
-    project: "cdservice"
-    provider: "fabric8"
-    group: "org.cdservice"
-  strategy:
-    rollingParams:
-      timeoutSeconds: 10800
-    type: "Rolling"
-  template:
-    spec:
-      containers:
-      - env:
-        - name: "KUBERNETES_NAMESPACE"
-          valueFrom:
-            fieldRef:
-              fieldPath: "metadata.namespace"
-        - name: "AB_JOLOKIA_OFF"
-          value: "true"
-        - name: "JAVA_APP_DIR"
-          value: "/deployments"
-        - name: "AB_OFF"
-          value: "true"
-        - name: "JAVA_OPTIONS"
-          value: "-Dswarm.project.stage.file=file:///app/config/project-stages.yml"
-        image: "cdservice:latest"
-        imagePullPolicy: "IfNotPresent"
-        name: "wildfly-swarm"
-        ports:
-        - containerPort: 8080
-          name: "http"
-          protocol: "TCP"
-        - containerPort: 9779
-          name: "prometheus"
-          protocol: "TCP"
-        - containerPort: 8778
-          name: "jolokia"
-          protocol: "TCP"
-        securityContext:
-          privileged: false
-        volumeMounts:
-          - name: config
-            mountPath: /app/config
-      volumes:
-        - configMap:
-            name: ${project.artifactId}
-            items:
-            - key: "project-stages.yml"
-              path: "project-stages.yml"
-          name: config
-  triggers:
-  - type: "ConfigChange"
-  - imageChangeParams:
-      automatic: true
-      containerNames:
-      - "wildfly-swarm"
-      from:
-        kind: "ImageStreamTag"
-        name: "cdservice:latest"
-    type: "ImageChange"
-EOF
-----
-
-Remark : The location of the `project-stages.yml` file to be used by Spring Boot is passed as JAVA_OPTIONS parameter
-
 . Deploy the `cdservice` project on OpenShift using this maven instruction
 +
 [source]
@@ -729,10 +655,10 @@ will be called. The file isn't mounted as a volume attached to the pod but that 
 [source]
 ----
 cd cdfront
-touch src/main/webapp/service.json
+touch src/main/resources/static/service.json
 
-cat << 'EOF' > src/main/webapp/service.json
-{ "cd-service": "http://cdservice-snowcamp.MY_HOST_IP_ADDRESS.xip.io/rest/catalogs/" }
+cat << 'EOF' > src/main/resources/static/service.json
+{ "cd-service": "http://cdservice-workshop.192.168.99.100.nip.io/rest/catalogs/" }
 EOF
 ----
 
@@ -742,9 +668,9 @@ EOF
 
 [source]
 ----
-touch src/main/webapp/scripts/services/config.js
+touch src/main/resources/static/services/config.js
 
-cat << 'EOF' > src/main/webapp/scripts/services/config.js
+cat << 'EOF' > src/main/resources/static/scripts/services/config.js
 angular.module('cdservice').factory('config', function ($http, $q) {
   var deferred = $q.defer();
   var apiUrl = null;
@@ -844,6 +770,27 @@ spec:
     kind: Service
     name: ${project.artifactId}
 EOF
+----
+
+. Add `Fabric8 maven plugin`
++
+[source]
+----
+<plugin>
+  <groupId>io.fabric8</groupId>
+  <artifactId>fabric8-maven-plugin</artifactId>
+  <version>3.2.28</version>
+  <executions>
+    <execution>
+      <id>fmp</id>
+      <phase>package</phase>
+      <goals>
+        <goal>resource</goal>
+        <goal>build</goal>
+      </goals>
+    </execution>
+  </executions>
+</plugin>
 ----
 
 . Deploy the cd front project
