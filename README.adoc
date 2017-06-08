@@ -242,6 +242,15 @@ jpa-new-field --named price --type java.lang.Float --target-entity org.cdservice
 jpa-new-field --named publication_date --type java.util.Date --temporalType DATE --target-entity org.cdservice.model.Catalog
 ----
 
+. One of the goal of this workshop is to show you how easy it could be with Spring to use JavaEE standards as JAX-RS. For that purpose we will add the Apache CXF Spring Boot
+  starter which provides such implemetnation like also a JSon PArser framework to generate the JSon responses
++
+[source]
+----
+project-add-dependencies org.apache.cxf:cxf-spring-boot-starter-jaxrs:3.1.11
+project-add-dependencies com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.8.8
+----
+
 . As we would like to expose our Catalog of CDs as a Service published behind as a REST endpoint, we will use another JBoss Forge command responsible
   to create a RestApplication and the Rest Service ("CatalogEndpoint.class").
 +
@@ -250,16 +259,42 @@ jpa-new-field --named publication_date --type java.util.Date --temporalType DATE
 rest-generate-endpoints-from-entities --targets org.cdservice.model.*
 ----
 
-TODO : Verify latest modifications of Christophe
-
-. We are almost set. The last step of this module section will consist to use this JBoss Forge scaffold command.
-  This command will populate the Web Front end which is a JavaScript AngularJS 1 project. This Front contains the screens
-  required to perform the CRUD operations by calling the REST service `http://myservice.com/rest/catalogs`
+. Add some config to let Apache CXF to discover the REST classes to be registered like also the path to map with its CXF Servlet.
+  Edit the application.properties file and add these keys
 +
 [source]
 ----
-scaffold-setup --provider AngularJS
-scaffold-generate --provider AngularJS --generate-rest-resources --targets org.cdservice.model.*
+cxf.jaxrs.component-scan=true
+cxf.path=/rest
+----
+
+. Add a JSon Provider bean within the `DemoApplication` java class who will populate the HTTP Body response
++
+[source]
+----
+import org.springframework.context.annotation.Bean;
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+
+@SpringBootApplication
+public class DemoApplication {
+
+	@Bean
+	public JacksonJsonProvider Config() {
+		return new JacksonJsonProvider();
+	}
+----
+
+TODO : Verify latest modifications of Christophe
+
+. We are almost set. The last step of this module section will consist to use this JBoss Forge scaffold command.
+  This command will populate the static Web content which is an AngularJS 1 application. This Frontend contains the screens
+  required to perform the CRUD operations to call the REST services `http://localhost:8080/rest/catalogs`
++
+[source]
+----
+mkdir -p ../cdfront/src/main/resources/static
+scaffold-setup --provider AngularJS --web-root ../../../../cdfront/src/main/resources/static
+scaffold-generate --provider AngularJS --generate-rest-resources --targets org.cdservice.model.* --web-root ../../../../cdfront/src/main/resources/static
 ----
 
 . Create within the `cdfront` folder a `WEB-INF` directory containing the following web.xml content. It contains the file to be used as Welcome page !
@@ -280,7 +315,6 @@ scaffold-generate --provider AngularJS --generate-rest-resources --targets org.c
     <welcome-file>/index.html</welcome-file>
   </welcome-file-list>
 </web-app>
-
 ----
 
 . As the service will be called from a resources which is not running from the same HTTP Server and domain, a REST filter should be created to add the CORS Headers
@@ -322,9 +356,8 @@ fabric8-setup
 ### Configure the datasource
 
 . To be able to use the project locally but also on OpenShift, we will define 2 datasources and JDBC drivers to use either a H2 in-memory
-  database which doesn't required any installation of a database or MySQL that we will install in OpenShift.
-. Add a folder `src/main/config` containing a `project-stages.yaml` file. This file will contain the definition of the datasources
-  that Spring Boot will use when Hibernate to try to call the database.
+  database which doesn't required any installation of a database or MySQL that we will install on OpenShift.
+. Add a folder `src/main/config-local` containing the application.properties file created.
 +
 [source]
 ----
@@ -333,7 +366,7 @@ cp src/main/resources/application.properties src/main/config-local
 ----
 
 . Define a maven profile within the `pom.xml` file where we will tell to maven to copy the `src/main/config-local` content to the target folder `src/main/resources`
-  when the project will be compiled. Declare also the h2 database dependency. This dependency will be detected by Spring Boot when the server will be started
+  when the project will be compiled. Move also the h2 database maven dependency within the profile. This dependency will be detected by Spring Boot when the server will be started
   and by consequence this H2 JDBC Driver will be used.
 +
 [source]
@@ -359,15 +392,14 @@ cp src/main/resources/application.properties src/main/config-local
 </profile>
 ----
 
-. Create a new configuration directory `src/main/config-openshift` where we will configure what will be deployed on OpenShift.
-. Move the `persistence.xml` file from the `src/main/resources` directory to another target directory `src/main/config-openshift/META-INF`
+. Create a new configuration directory `src/main/config-openshift` where we will place what we will use when the application will run on  OpenShift.
 +
 [source]
 ----
 mkdir -p src/main/config-openshift
 ----
 
-. Run again the JBoss Forge command `jpa-setup` to generate the spring keys to configure the MySQL datasource and toi use MySQL dialect
+. Run again the JBoss Forge command `jpa-setup` within the `cdservice` project to generate the spring keys to configure the MySQL datasource and to use MySQL dialect
 +
 [source]
 ----
@@ -377,7 +409,7 @@ jpa-setup --db-type MYSQL --database-url jdbc:mysql://mysql:3306/catalogdb
 +
 [source]
 ----
-cp src/main/resources/application.properties src/main/config-openshift
+mv src/main/resources/application.properties src/main/config-openshift
 ----
 
 . Create another profile called `openshift`
@@ -440,23 +472,10 @@ mvn clean compile -Popenshift
 +
 [source]
 ----
-project-new --named cdfront --stack JAVA_EE_7 --type wildfly-swarm --http-port 8081
-wildfly-swarm-add-fraction --fractions undertow
+project-new --named cdfront --overwrite --type jar
 ----
 
-. The `org.cdfront.rest.HelloWorldEndpoint.java` class created by the Swarm Forge command can be deleted as we will not use it
-+
-[source]
-----
-rm -rf cdfront/src/main/java/org/cdfront/rest/*
-----
-
-. As the web content has been created/populated previously, we will move the Web resources from the `cdservice` to the `cdfront` project.
-+
-[source]
-----
-mv cdservice/src/main/webapp/ cdfront/src/main/resources/static
-----
+. Transform it into a Spring Boot project
 
 . Setup this project as Fabric8 using the corresponding JBoss Forge command within the `cdfront` folder.
 +
