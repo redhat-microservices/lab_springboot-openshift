@@ -182,7 +182,7 @@ mvn archetype:generate -DarchetypeGroupId=org.codehaus.mojo.archetypes \
 mv project workshop && cd workshop
 ----
 
-. The following pom file will be created
+. Verify that your pom.xml file is similar to the following file.
 +
 [source]
 ----
@@ -199,26 +199,26 @@ mv project workshop && cd workshop
 
 ### Catalog CD project
 
-. Next create the `cdservice` maven module using the following JBoss Forge command. As this project is a Java EE project, we will pass as parameter to JBoss Forge the
+. Next create the `cdservice` maven module using the following JBoss Forge command. As this project is a Spring Boot project, we will pass as parameter to JBoss Forge the
   stack to be used which is `spring-boot`. JBoss Forge will create a new maven module, configure the pom.xml file.
   The following command must be executed within the Forge shell or by passing the command using this convention
   `forge -e "..."` where `...` corresponds to a Forge command.
 +
 [source]
 ----
-project-new --named cdservice --type spring-boot --spring-boot-version 1.4.6
+project-new --named cdservice --type spring-boot --dependencies web --packaging jar
 ----
 
-. Setup the JPA project where the provider used is `Hibernate`, the database `MYSQL` which corresponds to the dialect to be configured within the persistence file of Hibernate.
-  Specify also the datasource and the persistent-unit name. All these parameters will be used by the Forge addon to populate the file persistence.xml under the directory META-INF.
+. Setup the JPA project using as database type is `H2`. The JBoss Forge command will add a maven gav H2 artifact and will fill the application.properties file
+  with the Hibernate properties. No datasource is predefined here as we will only use H2 in memory and locally
   The command should be executed within the `cdservice` folder.
 +
 [source]
 ----
-jpa-setup --db-type H2 --data-source-name java:jboss/datasources/CatalogDS
+jpa-setup --db-type H2
 ----
 
-. This command will generate the properties used to configure the Hibernate framework and to access the database using this datasource
+. This command will generate the properties used to configure the Hibernate framework and to access the database
 +
 [source]
 ----
@@ -249,6 +249,8 @@ jpa-new-field --named publication_date --type java.util.Date --temporalType DATE
 ----
 rest-generate-endpoints-from-entities --targets org.cdservice.model.*
 ----
+
+TODO : Verify latest modifications of Christophe
 
 . We are almost set. The last step of this module section will consist to use this JBoss Forge scaffold command.
   This command will populate the Web Front end which is a JavaScript AngularJS 1 project. This Front contains the screens
