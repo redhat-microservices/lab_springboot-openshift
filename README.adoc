@@ -215,6 +215,18 @@ project-new --named cdservice --type spring-boot --spring-boot-version 1.4.6
 jpa-setup --db-type H2 --data-source-name java:jboss/datasources/CatalogDS
 ----
 
+. This command will generate the properties used to configure the Hibernate framework and to access the database using this datasource
++
+[source]
+----
+spring.jpa.properties.hibernate.show_sql=true
+spring.jpa.properties.hibernate.transaction.flush_before_completion=true
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.hbm2ddl.auto=create-drop
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect
+---
+
+
 . Create a Catalog Java (but also entity) class where the fields will be defined as such. It is not required to define the field with the PRIMARY key as it will be created
   by default by the JBoss Forge command.
 +
@@ -291,7 +303,6 @@ fabric8-setup
 <plugin>
    <groupId>io.fabric8</groupId>
    <artifactId>fabric8-maven-plugin</artifactId>
-   <version>3.1.92</version>
    <executions>
      <execution>
        <id>fmp</id>
@@ -301,13 +312,6 @@ fabric8-setup
        </goals>
      </execution>
    </executions>
-   <configuration>
-     <generator>
-       <includes>
-         <include>wildfly-swarm</include>
-       </includes>
-     </generator>
-   </configuration>
  </plugin>
 ----
 
@@ -320,45 +324,11 @@ fabric8-setup
 +
 [source]
 ----
-mkdir -p src/main/config
-touch src/main/config/project-stages.yaml
+mkdir -p src/main/config-local
+cp src/main/resources/application.properties src/main/config-local
 ----
 
-. Configure the datasource to use the H2 in-memory database with `ExampleDS` as datasource name
-+
-[source]
-----
-cat << 'EOF' > src/main/config/project-stages.yaml
-swarm:
-  datasources:
-    data-sources:
-      ExampleDS:
-        driver-name: h2
-        connection-url: jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-        user-name: sa
-        password: sa
-EOF
-----
-
-. Next, copy/paste the `persistence.xml` file which has been created by the JBoss Forge command `jpa-setup` under the folder `src/main/config/META-INF`
-+
-[source]
-----
-mkdir -p src/main/config/META-INF/
-cp src/main/resources/META-INF/persistence.xml src/main/config/META-INF/persistence.xml
-----
-
-. Change the datasource name like the dialect to be used
-  within the persistence file.
-+
-[source]
-----
-<jta-data-source>java:jboss/datasources/ExampleDS</jta-data-source>
-...
-<property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
-----
-
-. Define a maven profile within the `pom.xml` file where we will tell to maven to copy the `src/main/config` content to the target folder `src/main/resources`
+. Define a maven profile within the `pom.xml` file where we will tell to maven to copy the `src/main/config-local` content to the target folder `src/main/resources`
   when the project will be compiled. Declare also the h2 database dependency. This dependency will be detected by Spring Boot when the server will be started
   and by consequence this H2 JDBC Driver will be used.
 +
@@ -369,7 +339,7 @@ cp src/main/resources/META-INF/persistence.xml src/main/config/META-INF/persiste
   <build>
     <resources>
       <resource>
-        <directory>src/main/config</directory>
+        <directory>src/main/config-local</directory>
       </resource>
       <resource>
         <directory>src/main/resources</directory>
@@ -380,7 +350,6 @@ cp src/main/resources/META-INF/persistence.xml src/main/config/META-INF/persiste
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
-      <version>1.4.192</version>
     </dependency>
   </dependencies>
 </profile>
@@ -391,8 +360,20 @@ cp src/main/resources/META-INF/persistence.xml src/main/config/META-INF/persiste
 +
 [source]
 ----
-mkdir -p src/main/config-openshift/META-INF
-mv src/main/resources/META-INF/persistence.xml src/main/config-openshift/META-INF/persistence.xml
+mkdir -p src/main/config-openshift
+----
+
+. Run again the JBoss Forge command `jpa-setup` to generate the spring keys to configure the MySQL datasource and toi use MySQL dialect
++
+[source]
+----
+jpa-setup --db-type MYSQL --database-url jdbc:mysql://mysql:3306/catalogdb
+----
+. Copy the modified file to the new folder created
++
+[source]
+----
+cp src/main/resources/application.properties src/main/config-openshift
 ----
 
 . Create another profile called `openshift`
@@ -430,21 +411,20 @@ mv src/main/resources/META-INF/persistence.xml src/main/config-openshift/META-IN
 </profile>
 ----
 
-. To have a subset of data available within the database, copy the import.sql file to the `src/main/config` and `src/main/config-openshift` folders of your project.
+. To have a subset of data available within the database, copy the data.sql file to the `src/main/config-local` and `src/main/config-openshift` folders of your project.
 . Move to the `workshop` parent folder.
 +
 [source]
 ----
 cd ..
-cp ../scripts/service/import.sql cdservice/src/main/config
-cp ../scripts/service/import.sql cdservice/src/main/config-openshift
+cp ../scripts/service/data.sql cdservice/src/main/config-local
+cp ../scripts/service/data.sql cdservice/src/main/config-openshift
 ----
 
-. We can now build the project to be validate that it is in order.
+. We can now build the project to be validate that it works for the different profiles.
 +
 [source]
 ----
-mvn compile
 mvn clean compile -Plocal
 mvn clean compile -Popenshift
 ----
