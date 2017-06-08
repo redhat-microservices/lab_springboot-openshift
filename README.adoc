@@ -215,9 +215,6 @@ project-new --named cdservice --type spring-boot --spring-boot-version 1.4.6
 jpa-setup --db-type H2 --data-source-name java:jboss/datasources/CatalogDS
 ----
 
-Remark : The parameter `--configure-metadata` will tell to Forge to include within the pom.xml the Hibernate Maven plugin responsible to generate the classes from the Entity class
-         like the persistence.xml file.
-
 . Create a Catalog Java (but also entity) class where the fields will be defined as such. It is not required to define the field with the PRIMARY key as it will be created
   by default by the JBoss Forge command.
 +
@@ -228,7 +225,7 @@ jpa-new-field --named artist --target-entity org.cdservice.model.Catalog
 jpa-new-field --named title --target-entity org.cdservice.model.Catalog
 jpa-new-field --named description --length 2000 --target-entity org.cdservice.model.Catalog
 jpa-new-field --named price --type java.lang.Float --target-entity org.cdservice.model.Catalog
-jpa-new-field --named publicationDate --type java.util.Date --temporalType DATE --target-entity org.cdservice.model.Catalog
+jpa-new-field --named publication_date --type java.util.Date --temporalType DATE --target-entity org.cdservice.model.Catalog
 ----
 
 . As we would like to expose our Catalog of CDs as a Service published behind as a REST endpoint, we will use another JBoss Forge command responsible
@@ -247,6 +244,27 @@ rest-generate-endpoints-from-entities --targets org.cdservice.model.*
 ----
 scaffold-setup --provider AngularJS
 scaffold-generate --provider AngularJS --generate-rest-resources --targets org.cdservice.model.*
+----
+
+. Create within the `cdfront` folder a `WEB-INF` directory containing the following web.xml content. It contains the file to be used as Welcome page !
++
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.0" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+  <display-name>cdservice</display-name>
+  <session-config>
+    <session-timeout>30</session-timeout>
+  </session-config>
+  <mime-mapping>
+    <extension>ico</extension>
+    <mime-type>image/x-icon</mime-type>
+  </mime-mapping>
+  <welcome-file-list>
+    <welcome-file>/index.html</welcome-file>
+  </welcome-file-list>
+</web-app>
+
 ----
 
 . As the service will be called from a resources which is not running from the same HTTP Server and domain, a REST filter should be created to add the CORS Headers
