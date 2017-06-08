@@ -416,8 +416,8 @@ cp src/main/resources/application.properties src/main/config-openshift
 [source]
 ----
 cd ..
-cp ../scripts/service/data.sql cdservice/src/main/config-local
-cp ../scripts/service/data.sql cdservice/src/main/config-openshift
+cp ../scripts/service/data-h2.sql cdservice/src/main/config-local/data.sql
+cp ../scripts/service/data-mysql.sql cdservice/src/main/config-openshift/data.sql
 ----
 
 . We can now build the project to be validate that it works for the different profiles.
@@ -554,8 +554,8 @@ the Web Server, we will externalize this file and mount it as a volume to the po
  These files will be created manually as no tool is available to generate them and will be placed in a directory which is scanned by the Fabric8 Maven
  plugin when the project is build and deployed on OpenShift.
 
-. Copy the content of the application.properties file within the config.yaml file to be created (see hereafter) and next delete it
-. Create under the directory `src/main/fabric8` of the `cdservice` maven module the `configmap.yml` file which contains the definition of the project-stages.yml.
+. Copy the content of the `application.properties` file within the config.yaml file to be created (see hereafter) and next delete it
+. Create under the directory `src/main/fabric8` of the `cdservice` maven module the `configmap.yml` file which contains the definition of application.properties.
 +
 [source]
 ----
@@ -586,7 +586,7 @@ EOF
 Remark: As you can see, the hostname defined for the connection-url corresponds also to the `mysql` service published on OpenShift (`oc get svc/mysql`).
 This name will be resolved by the internal DNS server exposed by OpenShift when the application will issue a request to this machine.
 
-. In order to expose our docker container created by Kubernetes as pod, we will create a `svc.yml`. The content of this file will be used
+. In order to expose our docker container as a Service, we will create a `service` resource. The content of the file `svc.yml` will be used
   by Kubernetes to expose using its Api Gateway a service using the specified port. The targetPort allows to map the docker port with the targetPort
   exposed by the Api.
 . Add a `svc.yml` under the `src/main/fabric8` folder where the target port is 8080 in order to create a service
@@ -771,7 +771,7 @@ spec:
 EOF
 ----
 
-. Add `Fabric8 maven plugin`
+. Add the `Fabric8 maven plugin` to the pom.xml file
 +
 [source]
 ----
@@ -809,7 +809,7 @@ mvn fabric8:deploy
 ## Enable circuit breaker
 
 Within this section, we will implement the circuit breaker pattern using the NetFlix OSS Hystrix project. The breaker will be developed within
-our CatalogEnpoint in order to send a dummy record to the front if the database is not longer available. We will extend the `cdservice` project
+our CatalogEndpoint in order to send a dummy record to the front if the database is not longer available. We will extend the `cdservice` project
 to support this pattern by adding first an HystrixCommand and next to register it within the Endpoint class. The command contains 2 methods `run()` and `fallback()`
 which are used by the HystrixServlet with the help of the Java observable pattern. The method run will be called regularly to check if we get a response from the MySQL database,
 if this is the case, the fallback method will be called. The information (= events or hearbeat messages) created, are published by Hystrix within a server called
