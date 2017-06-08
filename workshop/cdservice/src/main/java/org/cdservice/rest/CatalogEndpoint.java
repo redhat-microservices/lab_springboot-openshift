@@ -22,12 +22,14 @@ import javax.ws.rs.core.UriBuilder;
 import org.cdservice.model.Catalog;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 
  */
 @Path("/catalogs")
 @Component
+@Transactional
 public class CatalogEndpoint {
 	@PersistenceContext
 	private EntityManager em;
