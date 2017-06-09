@@ -269,7 +269,7 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 public class DemoApplication {
 
 	@Bean
-	public JacksonJsonProvider Config() {
+	public JacksonJsonProvider config() {
 		return new JacksonJsonProvider();
 	}
 ----
