@@ -467,7 +467,7 @@ server.port=8081
 mkdir -p cdfront/src/main/resources/static
 ----
 
-. Next, scaffold the code within the cdservice project
+. Next, scaffold the code within the `cdservice` project
 +
 [source]
 ----

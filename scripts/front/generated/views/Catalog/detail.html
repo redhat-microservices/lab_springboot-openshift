@@ -1,0 +1,54 @@
+<header ng-switch on="$location.path().indexOf('/Catalogs/new') > -1">
+    <h3 ng-switch-when="true">Create a new Catalog</h3>
+    <h3 ng-switch-when="false">View or edit Catalog</h3>
+</header>
+<form id="CatalogForm" name="CatalogForm" class="form-horizontal" role="form">
+    
+
+    <div class="form-group" ng-class="{'has-error': CatalogForm.artist.$invalid}">
+        <label for="artist" class="col-sm-2 control-label">Artist</label>
+        <div id="artistControls" class="col-sm-10">
+            <input id="artist" name="artist" type="text" class="form-control" ng-model="catalog.artist" placeholder="Enter the Catalog Artist"></input>
+        </div>
+    </div>
+
+    <div class="form-group" ng-class="{'has-error': CatalogForm.title.$invalid}">
+        <label for="title" class="col-sm-2 control-label">Title</label>
+        <div id="titleControls" class="col-sm-10">
+            <input id="title" name="title" type="text" class="form-control" ng-model="catalog.title" placeholder="Enter the Catalog Title"></input>
+        </div>
+    </div>
+
+    <div class="form-group" ng-class="{'has-error': CatalogForm.description.$invalid}">
+        <label for="description" class="col-sm-2 control-label">Description</label>
+        <div id="descriptionControls" class="col-sm-10">
+            <input id="description" name="description" type="text" ng-maxlength="2000" class="form-control" ng-model="catalog.description" placeholder="Enter the Catalog Description"></input>
+            <span class="help-block error" ng-show="CatalogForm.description.$error.maxlength">maximum length is 2000</span>
+        </div>
+    </div>
+
+    <div class="form-group" ng-class="{'has-error': CatalogForm.price.$invalid}">
+        <label for="price" class="col-sm-2 control-label">Price</label>
+        <div id="priceControls" class="col-sm-10">
+            <input id="price" name="price" type="number" class="form-control" ng-model="catalog.price" placeholder="Enter the Catalog Price"></input>
+            <span class="help-block error" ng-show="CatalogForm.price.$error.number">not a number</span>
+        </div>
+    </div>
+
+    <div class="form-group" ng-class="{'has-error': CatalogForm.publicationDate.$invalid}">
+        <label for="publicationDate" class="col-sm-2 control-label">Publication Date</label>
+        <div id="publicationDateControls" class="col-sm-10">
+            <datetime id="publicationDate" name="publicationDate" ng-model="catalog.publicationDate" placeholder="Enter the Catalog Publication Date"></datetime>
+            <span class="help-block error" ng-show="CatalogForm.publicationDate.$error.datetimeFormat">does not match format "yyyy-MM-dd hh:mm:ss" (e.g. 2013-12-01 22:00:00)</span>
+        </div>
+    </div>
+
+
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button id="saveCatalog" name="saveCatalog" class="btn btn-primary" ng-disabled="isClean() || CatalogForm.$invalid" ng-click="save()"><span class="glyphicon glyphicon-ok-sign"></span> Save</button>
+            <button id="cancel" name="cancel" class="btn btn-default" ng-click="cancel()"><span class="glyphicon glyphicon-remove-sign"></span> Cancel</button>
+            <button id="deleteCatalog" name="deleteCatalog" class="btn btn-danger" ng-show="catalog.id" ng-click="remove()"><span class="glyphicon glyphicon-trash"></span> Delete</button>
+        </div>
+    </div>
+</form>
