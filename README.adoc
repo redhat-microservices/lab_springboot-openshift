@@ -297,7 +297,7 @@ rest-new-cross-origin-resource-sharing-filter
 +
 [source]
 ----
-fabric8-setup
+fabric8-setup --integration-test=false
 ----
 
 . As the JBoss Fabric Forge Addon used will create a project using the latest version of the Fabric8 plugin which hasn't been tested for this lab,
@@ -467,7 +467,7 @@ cp -r ../scripts/front/modified/ cdfront/src/main/resources/static/
 [source]
 ----
 cd cdfront
-fabric8-setup
+fabric8-setup --integration-test=false
 ----
 
 . Change the address of the `cdservice` http server that the front will access.
@@ -495,13 +495,13 @@ fabric8-setup
 
 ### Deploy on OpenShift
 
-### Setup My SQL Database
+### Setup MySQL Database
 
-. Verify first that you are well connected to `OpenShift`
+. Verify first that you are well connected to the `OpenShift` platform
 
   oc status
 
-. Create the workshop namespace/project
+. Create a new namespace where the microservices will be deployed
 
   oc new-project workshop
 
@@ -515,7 +515,7 @@ oc new-app --template=mysql-persistent \
     -p MYSQL_DATABASE=catalogdb
 ----
 
-. Next, check if the Database is up and alive
+. Next, check if the Database is up and alive and connect to the pod to execute some SQL commands
 +
 [source]
 ----
@@ -535,15 +535,11 @@ Remark: As we haven't yet deployed the service, the Catalog DB hasn't been yet c
 
 ### Externalize the Datasource
 
-To avoid to package the `project-stages.yml` file containing the definition of the datasource within the uber jar file used by Spring Boot to launch
-the Web Server, we will externalize this file and mount it as a volume to the pod/docker container when it will be created. This process will require
- to define a file containing the definition of the Volume to be mounted and the key of the value to be fetch from an internal cache managed by the Kubernetes
- platform which is called `configMap`. The ConfigMap that we will create for this project will help us to define the content of the `project-stages.yml`.
- These files will be created manually as no tool is available to generate them and will be placed in a directory which is scanned by the Fabric8 Maven
- plugin when the project is build and deployed on OpenShift.
+To externalize the datasource configuration that SpringBoot will use to access the database, we will create a Kubernetes `configMap` resource.
+This `ConfigMap` will contain as input the content of the application.properties file. The resource to be created will be defined under a json `configmap.json` file
+under tje folder `src/main/fabric8`. All the resources included within this folder, will be scanned and used by the Fabric8 Maven Plugin when the application will be deployed on Openshift.
 
-. Copy the content of the `application.properties` file within the config.yaml file to be created (see hereafter) and next delete it
-. Create under the directory `src/main/fabric8` of the `cdservice` maven module the `configmap.yml` file which contains the definition of application.properties.
+. Create under the directory `src/main/fabric8` of the `cdservice` maven module a `configmap.yml` file.
 +
 [source]
 ----
@@ -552,6 +548,15 @@ mkdir -p src/main/fabric8
 touch src/main/fabric8/configmap.yml
 
 cat << 'EOF' > src/main/fabric8/configmap.yml
+metadata:
+  name: ${project.artifactId}
+data:
+----
+
+. Copy the content of the `application.properties` file within the `config.yaml` file after the key `data:` and next delete it
++
+[source]
+----
 metadata:
   name: ${project.artifactId}
 data:
@@ -571,11 +576,11 @@ data:
 EOF
 ----
 
-Remark: As you can see, the hostname defined for the connection-url corresponds also to the `mysql` service published on OpenShift (`oc get svc/mysql`).
+Remark: As you can see, the hostname defined for the connection-url corresponds to the `mysql` service published on OpenShift (`oc get svc/mysql`).
 This name will be resolved by the internal DNS server exposed by OpenShift when the application will issue a request to this machine.
 
 . In order to expose our docker container as a Service, we will create a `service` resource. The content of the file `svc.yml` will be used
-  by Kubernetes to expose using its Api Gateway a service using the specified port. The targetPort allows to map the docker port with the targetPort
+  by Kubernetes to expose using its Api Gateway a service available externally under the specified port. The targetPort allows to map the docker port with the targetPort
   exposed by the Api.
 . Add a `svc.yml` under the `src/main/fabric8` folder where the target port is 8080 in order to create a service
 +
