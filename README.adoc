@@ -158,8 +158,7 @@ to use it.
 
 [source]
 ----
-cd scripts
- ./setup.sh
+ ./scripts/setup.sh
 ----
 
 ## Decomposed steps
@@ -239,15 +238,6 @@ jpa-new-field --named title --target-entity org.cdservice.model.Catalog
 jpa-new-field --named description --length 2000 --target-entity org.cdservice.model.Catalog
 jpa-new-field --named price --type java.lang.Float --target-entity org.cdservice.model.Catalog
 jpa-new-field --named publication_date --type java.util.Date --temporalType DATE --target-entity org.cdservice.model.Catalog
-----
-
-. One of the goal of this workshop is to show you how easy it could be with Spring to use JavaEE standards as JAX-RS. For that purpose we will add the Apache CXF Spring Boot
-  starter which provides such implemetnation like also a JSon PArser framework to generate the JSon responses
-+
-[source]
-----
-project-add-dependencies org.apache.cxf:cxf-spring-boot-starter-jaxrs:3.1.11
-project-add-dependencies com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.8.8
 ----
 
 . As we would like to expose our Catalog of CDs as a Service published behind as a REST endpoint, we will use another JBoss Forge command responsible
