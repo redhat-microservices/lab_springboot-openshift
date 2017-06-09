@@ -19,9 +19,18 @@ rest-generate-endpoints-from-entities --targets org.cdservice.model.* --generato
 # Enable CORS
 rest-new-cross-origin-resource-sharing-filter
 
+# Add Fabric8 Maven Plugin
+fabric8-setup --integration-test=false
+
 # Come up to top level so we can create a new project
 cd ~~
 cd ..
 
 # ------  CD Store Web Front End [:8081/rest] ---------------
 project-new --type spring-boot --named cdfront --create-static-content true --port 8081
+
+# Copy static content
+cp ../scripts/front/modified/ src/main/resources/static/
+
+# Add Fabric8 Maven Plugin
+fabric8-setup --integration-test=false
