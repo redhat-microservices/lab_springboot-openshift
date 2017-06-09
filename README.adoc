@@ -123,7 +123,7 @@ The goal of this lab is to :
 - Implements the circuit broker pattern
 
 The project will contain 3 modules; a web static Front end, a backend service exposed by the Spring Boot Java Container & a MySQL database.
-The JPA layer is managed by Hibernate with the help of the module WildFly JPA. The front end is a AngularJS application.
+The JPA layer is managed by Hibernate and with the help of Spring ORM. The front end is a AngularJS application.
 
 Each module will be packaged and deployed as a Docker image on OpenShift. The OpenShift Source to Image Tool (= https://docs.openshift.com/enterprise/3.2/creating_images/s2i.html[S2I]) will be used for that purpose.
 It will use the Java S2I Docker image responsible to build the final Docker image of your project using the source code of the maven module uploaded to the openshift platform.
