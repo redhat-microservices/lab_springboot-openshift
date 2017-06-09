@@ -30,7 +30,7 @@ cd ..
 project-new --type spring-boot --named cdfront --create-static-content true --port 8081
 
 # Copy static content
-cp ../scripts/front/modified/ src/main/resources/static/
+cp ../../scripts/front/modified/ src/main/resources/static/
 
 # Add Fabric8 Maven Plugin
 fabric8-setup --integration-test=false
