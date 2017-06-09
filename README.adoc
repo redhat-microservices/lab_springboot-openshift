@@ -133,9 +133,10 @@ in order to issue the commands allowing to build aproject, deploy it and finally
 The project will be developed using Java IDE Tool like "IntelliJ, JBoss Developer Studio" while the JBoss Forge tool will help us to design the Java application, add the required dependencies,
  populate the Hibernate in order to:
 
+- Setup the database connection & JPA
 - Create the REST Service
-- Modelize the JPA Entity & the model
-- Scaffold the AngularJS application
+- Create the Entity & fields
+- Scaffold the AngularJS application (optional)
 
 # Project creation
 
