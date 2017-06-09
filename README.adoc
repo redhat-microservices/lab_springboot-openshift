@@ -163,7 +163,7 @@ to use it.
  where <PROJECT_NAME> corresponds to the name of the directory where the project will be created
 ----
 
-NOTE: IF you must execute the command using another version o JBoss Forge installed on tour machine, you can also pass the pass to access the forge executable using an env var
+NOTE: If you want to create the project using another version of JBoss Forge deployed under a different path on your machine, you can pass the parameter to access the forge executable using an env var
       `FORGE_PATH=$HOME/MyForge/forge ./scripts/setup.sh demo`
 
 ## Decomposed steps
