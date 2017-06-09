@@ -378,20 +378,7 @@ content files (html, js, ...) and running using a different port number.
 project-new --type spring-boot --named cdfront --create-static-content true --port 8081
 ----
 
-. The last step of this module section will consist to use a JBoss Forge scaffold command to populate the static Web content.
-  The AngularJS application created contains the screens allowing to perform the CRUD operations
-  against the Catalog REST service exposed by this endpoint `http://localhost:8080/rest/catalogs`.
-  The content is generated using the `CatalogEndpoint` as input created previously within the `cdservice` project.
-
-. Scaffold the code within the `cdservice` project using these JBoss forge commands
-+
-[source]
-----
-scaffold-setup --provider AngularJS --web-root ../../../../cdfront/src/main/resources/static
-scaffold-generate --provider AngularJS --generate-rest-resources --targets org.cdservice.model.* --web-root ../../../../cdfront/src/main/resources/static
-----
-
-. OR copy content from `scripts/front/modified` directory
+. Copy the content of the AngularJS application from the this `scripts/front/modified` directory to the `static` folder created under the `cdfront`
 +
 [source]
 ----
@@ -589,10 +576,92 @@ NOTE: The file isn't mounted as a volume attached to the pod but that could be d
 
 . Change the `MY_HOST_IP_ADDRESS` key with the value of the private IP address of your virtual machine
 
-WARNING: To be done when code has been generated
+. As we will deploy the CD Front project as a Service that we will route externally from the host machine, we will create 2 OpenShift resources;
+  one to configure the service exposed by the Kubernetes Api (gateway) and the other to configure the HA Proxy how to access the service from the host machine
+. Add a `svc.yml` under the `src/main/fabric8` folder where the target port is 8081 in order to create a service.
++
+[source]
+----
+mkdir -p src/main/fabric8/
+touch src/main/fabric8/svc.yml
 
-. Create this `config.js` file within the directory scripts containing a $http.get request to access the content
-  of the json file & fetch the key `cd-service`. This key will contain the hostname or service name to be accessed
+cat << 'EOF' > src/main/fabric8/svc.yml
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${project.artifactId}
+spec:
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8081
+  type: ClusterIP
+EOF
+----
+
+. Create a `route.yml` file under the `src/main/fabric8` to tell to OpenShift to create a route
++
+[source]
+----
+touch src/main/fabric8/route.yml
+
+cat << 'EOF' > src/main/fabric8/route.yml
+apiVersion: v1
+kind: Route
+metadata:
+  name: ${project.artifactId}
+spec:
+  port:
+    targetPort: 8081
+  to:
+    kind: Service
+    name: ${project.artifactId}
+EOF
+----
+
+. Add the Fabric8 Maven Plugin in order to package/deploy the application on Openshift.
+  Issue this JBoss Forge command.
++
+[source]
+----
+fabric8-setup --integration-test=false
+----
+
+. Deploy the cd front project
++
+[source]
+----
+mvn fabric8:deploy
+----
+
+. Check that you can access the HTML page of the Front. Remark : you can get the route address using the command `oc get route/cdfront-snowcamp`
+
+  http://cdfront-snowcamp.MY_HOST_IP_ADDRESS.xip.io/
+
+. Change the `MY_HOST_IP_ADDRESS` key with the value of the private IP address of your virtual machine
+. Open your browser and verifies that you can access the Front and consult the CDs collection.
+
+### Externalize Front URL address to access the backend (optional)
+
+JBoss Forge offers a command which allows to populate an Angular JS Web Front which contains the UI screens
+in order to perform the CRUD operations against the Catalog REST service exposed by the endpoint `http://localhost:8080/rest/catalogs`.
+
+The content is generated from the `CatalogEndpoint` class, part of the `cdservice` project.
+The JBoss Forge command will create a project which is supposed to access the service within the same application.
+As we will deploy our application as 2 separate microservices, then we will refactor the project generated to pass the URL of the backend service
+
+The next commands explain how you can scaffold your project and next to customize the javascript to pass the URL.
+
+. Scaffold the code within the `cdservice` project using these JBoss forge commands
++
+[source]
+----
+scaffold-setup --provider AngularJS --web-root ../../../../cdfront/src/main/resources/static
+scaffold-generate --provider AngularJS --generate-rest-resources --targets org.cdservice.model.* --web-root ../../../../cdfront/src/main/resources/static
+----
+
+. Create this `config.js` file within the directory scripts containing a `$http.get` request to access the content
+  of the json file which contains the key `cd-service`. This key will contain the hostname or service name to be accessed
 
 [source]
 ----
@@ -657,91 +726,6 @@ angular.module('cdservice').factory('CatalogResource', function ($resource, conf
 
     <script src="scripts/services/config.js"></script>
 
-. As we will deploy the CD Front project as a Service that we will route externally from the host machine, we will create 2 OpenShift objects;
-  one to configure the service exposed by the Kubernetes Api (gateway) and the other to configure the HA Proxy how to access the service from the host machine
-. Add a `svc.yml` under the `src/main/fabric8` folder where the target port is 8081 in order to create a service.
-+
-[source]
-----
-mkdir -p src/main/fabric8/
-touch src/main/fabric8/svc.yml
-
-cat << 'EOF' > src/main/fabric8/svc.yml
-apiVersion: v1
-kind: Service
-metadata:
-  name: ${project.artifactId}
-spec:
-  ports:
-    - protocol: TCP
-      port: 8080
-      targetPort: 8081
-  type: ClusterIP
-EOF
-----
-
-. Create a `route.yml` file under the `src/main/fabric8` to tell to OpenShift to create a route
-+
-[source]
-----
-touch src/main/fabric8/route.yml
-
-cat << 'EOF' > src/main/fabric8/route.yml
-apiVersion: v1
-kind: Route
-metadata:
-  name: ${project.artifactId}
-spec:
-  port:
-    targetPort: 8081
-  to:
-    kind: Service
-    name: ${project.artifactId}
-EOF
-----
-
-. Add the `Fabric8 maven plugin` to the pom.xml file
-+
-[source]
-----
-<plugin>
-  <groupId>io.fabric8</groupId>
-  <artifactId>fabric8-maven-plugin</artifactId>
-  <version>3.2.28</version>
-  <executions>
-    <execution>
-      <id>fmp</id>
-      <phase>package</phase>
-      <goals>
-        <goal>resource</goal>
-        <goal>build</goal>
-      </goals>
-    </execution>
-  </executions>
-</plugin>
-----
-
-. Add the Fabric8 Maven Plugin in order to package/deploy the application on Openshift.
-  Issue this JBoss Forge command.
-+
-[source]
-----
-fabric8-setup --integration-test=false
-----
-
-. Deploy the cd front project
-+
-[source]
-----
-mvn fabric8:deploy
-----
-
-. Check that you can access the HTML page of the Front. Remark : you can get the route address using the command `oc get route/cdfront-snowcamp`
-
-  http://cdfront-snowcamp.MY_HOST_IP_ADDRESS.xip.io/
-
-. Change the `MY_HOST_IP_ADDRESS` key with the value of the private IP address of your virtual machine
-. Open your browser and verifies that you can access the Front and consult the CDs collection.
 
 ## Enable circuit breaker
 
