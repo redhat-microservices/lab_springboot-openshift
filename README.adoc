@@ -370,7 +370,7 @@ mkdir -p src/main/config-openshift
 +
 [source]
 ----
-jpa-setup --db-type MYSQL --database-url jdbc:mysql://mysql:3306/catalogdb
+jpa-setup --db-type MYSQL --database-url jdbc:mysql://mysql:3306/catalogdb --username mysql --password mysql
 ----
 . Copy the modified file to the new folder created
 +
@@ -419,9 +419,8 @@ mv src/main/resources/application.properties src/main/config-openshift
 +
 [source]
 ----
-cd ..
-cp ../scripts/service/data-h2.sql cdservice/src/main/config-local/data.sql
-cp ../scripts/service/data-mysql.sql cdservice/src/main/config-openshift/data.sql
+cp ../../scripts/service/data-h2.sql src/main/config-local/data.sql
+cp ../../scripts/service/data-mysql.sql src/main/config-openshift/data.sql
 ----
 
 . We can now build the project to be validate that it works for the different profiles.
