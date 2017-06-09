@@ -442,18 +442,12 @@ content files (html, js, ...) and running using a different port number.
 project-new --type spring-boot --named cdfront --create-static-content true --port 8081
 ----
 
-. Generate the static content using the REST endpoints defined within the cdservice project
-  The last step of this module section will consist to use a scaffold command to populate the static Web content.
-  This AngularJS application contains the screens required to perform the CRUD operations to call the REST services `http://localhost:8080/rest/catalogs`
+. The last step of this module section will consist to use a JBoss Forge scaffold command to populate the static Web content.
+  The AngularJS application created contains the screens allowing to perform the CRUD operations
+  against the Catalog REST service exposed by this endpoint `http://localhost:8080/rest/catalogs`.
+  The content is generated using the `CatalogEndpoint` as input created previously within the `cdservice` project.
 
-. First create the missing folder where the static content will be generated
-+
-[source]
-----
-mkdir -p cdfront/src/main/resources/static
-----
-
-. Next, scaffold the code within the `cdservice` project
+. Scaffold the code within the `cdservice` project using these JBoss forge commands
 +
 [source]
 ----
@@ -461,7 +455,7 @@ scaffold-setup --provider AngularJS --web-root ../../../../cdfront/src/main/reso
 scaffold-generate --provider AngularJS --generate-rest-resources --targets org.cdservice.model.* --web-root ../../../../cdfront/src/main/resources/static
 ----
 
-. OR copy content from `scripts/front/modified directory`
+. OR copy content from `scripts/front/modified` directory
 +
 [source]
 ----
