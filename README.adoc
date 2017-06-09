@@ -291,6 +291,8 @@ public class DemoApplication {
 rest-new-cross-origin-resource-sharing-filter
 ----
 
+. Edit the class created to add the Spring annotation `@Component`
+
 . Now, we will add the Fabric8 Maven Plugin and configure the pom.xml file. This Fabric8 Maven plugin is our client to communicate with the OpenShift platform.
   Issue this command.
 +
