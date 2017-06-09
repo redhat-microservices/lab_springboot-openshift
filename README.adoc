@@ -436,26 +436,13 @@ mvn clean compile -Popenshift
 
 ### Store Front end
 
-. It is time now to create the store front project & setup Spring Boot. We will specify the HTTP Container to be used which is here Undertow.
+. It is time now to create the store front project & setup Spring Boot. We will for that purpose generate a Spring Boot application able to manage static
+content files (html, js, ...) and running using a different port number.
 . Execute the following JBoss Forge command within the `workshop` folder.
 +
 [source]
 ----
-project-new --named cdfront --type jar
-----
-
-. Transform it into a Spring Boot project
-+
-[source]
-----
-spring-boot-new-project --dependencies web
-----
-
-. Change the port number to be use by editing the application.properties file and adding this key
-+
-[source]
-----
-server.port=8081
+project-new --type spring-boot --named cdfront --create-static-content true --port 8081
 ----
 
 . Generate the static content using the REST endpoints defined within the cdservice project
@@ -477,6 +464,13 @@ scaffold-setup --provider AngularJS --web-root ../../../../cdfront/src/main/reso
 scaffold-generate --provider AngularJS --generate-rest-resources --targets org.cdservice.model.* --web-root ../../../../cdfront/src/main/resources/static
 ----
 
+. OR copy content from `scripts/front/modified directory`
++
+[source]
+----
+cp -r ../scripts/front/modified/ cdfront/src/main/resources/static/
+----
+
 . Setup this project as Fabric8 using the corresponding JBoss Forge command within the `cdfront` folder.
 +
 [source]
@@ -485,12 +479,12 @@ cd cdfront
 fabric8-setup
 ----
 
-. Change the address of the `cdservice` http server that the front will access. Edit the file src/main/resources/static/scripts/services/CatalogFactory.js and
-  add modify the var resource
+. Change the address of the `cdservice` http server that the front will access.
+  Edit the file `src/main/resources/static/service.json` and add modify the var resource
 +
 [source]
 ----
-var resource = $resource('http://localhost:8080/rest/catalogs/:CatalogId' .....
+{ "cd-service": "http://localhost:8080/rest/catalogs/" }
 ----
 
 ## Build and deploy
@@ -506,7 +500,7 @@ var resource = $resource('http://localhost:8080/rest/catalogs/:CatalogId' .....
 
   mvn spring-boot:run
 
-. Open the project within your browser `http://localhost:8081/index.html`
+. Open the project within your browser `http://localhost:8081`
 
 ### Deploy on OpenShift
 
@@ -648,23 +642,23 @@ Remark : you can retrieve the route address to access your service using this oc
 
 ### Externalize Front Service
 
-The URL to access the service will be specified within a `settings.json` file that the AngularJS framework will load when the service `/catalogs`
-will be called. The file isn't mounted as a volume attached to the pod but that could be done using the same mechanism as presented before.
+The URL to access the service will be specified within the `service.json` file that the AngularJS framework will load when the service `/catalogs`
+will be called.
 
-. Create a `service.json` file under webapp folder of the cd front project & define the following key/value where the HOST address corresponds to the IP address used
+NOTE: The file isn't mounted as a volume attached to the pod but that could be done using the same mechanism as presented before.
+
+. Edit the `service.json` file under `cdfront/src/main/resources/static` folder & modify the following key where the HOST address corresponds to the IP address used
   by your VM machine
 +
 [source]
 ----
-cd cdfront
-touch src/main/resources/static/service.json
-
-cat << 'EOF' > src/main/resources/static/service.json
-{ "cd-service": "http://cdservice-workshop.192.168.99.100.nip.io/rest/catalogs/" }
-EOF
+{ "cd-service": "http://cdservice-workshop.MY_HOST_IP_ADDRESS.nip.io/rest/catalogs/" }
 ----
 
 . Change the `MY_HOST_IP_ADDRESS` key with the value of the private IP address of your virtual machine
+
+WARNING: To be done when code has been generated
+
 . Create this `config.js` file within the directory scripts containing a $http.get request to access the content
   of the json file & fetch the key `cd-service`. This key will contain the hostname or service name to be accessed
 
