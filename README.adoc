@@ -292,35 +292,6 @@ rest-new-cross-origin-resource-sharing-filter
 
 . Edit the class created to add the Spring annotation `@Component`
 
-. Now, we will add the Fabric8 Maven Plugin and configure the pom.xml file. This Fabric8 Maven plugin is our client to communicate with the OpenShift platform.
-  Issue this command.
-+
-[source]
-----
-fabric8-setup --integration-test=false
-----
-
-. As the JBoss Fabric Forge Addon used will create a project using the latest version of the Fabric8 plugin which hasn't been tested for this lab,
-  we will change the version of the Fabric8 Maven plugin from 3.2.9 to 3.1.92 like also specify the generator to be used.
-  Add the generator wildfly-swarm that we will use.
-+
-[source]
-----
-<plugin>
-   <groupId>io.fabric8</groupId>
-   <artifactId>fabric8-maven-plugin</artifactId>
-   <executions>
-     <execution>
-       <id>fmp</id>
-       <goals>
-         <goal>resource</goal>
-         <goal>build</goal>
-       </goals>
-     </execution>
-   </executions>
- </plugin>
-----
-
 ### Configure MySQL datasource
 
 . To be able to use the project locally but also on OpenShift, we will define another datasource and JDBC driver to use MySQL that we will install on OpenShift.
@@ -462,14 +433,6 @@ scaffold-generate --provider AngularJS --generate-rest-resources --targets org.c
 cp -r ../scripts/front/modified/ cdfront/src/main/resources/static/
 ----
 
-. Setup this project as Fabric8 using the corresponding JBoss Forge command within the `cdfront` folder.
-+
-[source]
-----
-cd cdfront
-fabric8-setup --integration-test=false
-----
-
 . Change the address of the `cdservice` http server that the front will access.
   Edit the file `src/main/resources/static/service.json` and add modify the var resource
 +
@@ -489,7 +452,7 @@ fabric8-setup --integration-test=false
 
 . cd `cdfront`
 
-  mvn spring-boot:run
+  mvn spring-boot:run -Plocal
 
 . Open the project within your browser `http://localhost:8081`
 
@@ -621,6 +584,14 @@ spec:
     kind: Service
     name: ${project.artifactId}
 EOF
+----
+
+. Add the Fabric8 Maven Plugin in order to package/deploy the application on Openshift.
+  Issue this JBoss Forge command.
++
+[source]
+----
+fabric8-setup --integration-test=false
 ----
 
 . Deploy the `cdservice` project on OpenShift using this maven instruction
@@ -783,6 +754,14 @@ EOF
     </execution>
   </executions>
 </plugin>
+----
+
+. Add the Fabric8 Maven Plugin in order to package/deploy the application on Openshift.
+  Issue this JBoss Forge command.
++
+[source]
+----
+fabric8-setup --integration-test=false
 ----
 
 . Deploy the cd front project
