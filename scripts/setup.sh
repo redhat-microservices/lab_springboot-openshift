@@ -2,12 +2,16 @@
 
 #
 # Usage: ./scripts/setup.sh <PROJECT_DIR> <FORGE_PATH> <SCAFFOLD_BOOLEAN>
-# E.g. ./scripts/setup.sh demo ~/Temp/dev/forge/bin true
+# E.g.
+# To scaffold, simply add the tru boolean
+# ./scripts/setup.sh demo ~/Temp/dev/forge/bin true
+# By default, nos scaffolding will take place
+# ./scripts/setup.sh demo ~/Temp/dev/forge/bin
 #
 
 PROJECT_DIR=${1:-demo}
 FORGE_PATH=$2
-SCAFFOLD=$3
+SCAFFOLD=${3:-false}
 
 export CURRENT=$(pwd)
 export FORGE_PATH=$2
