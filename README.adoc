@@ -321,10 +321,9 @@ fabric8-setup
  </plugin>
 ----
 
-### Configure the datasource
+### Configure MySQL datasource
 
-. To be able to use the project locally but also on OpenShift, we will define 2 datasources and JDBC drivers to use either a H2 in-memory
-  database which doesn't required any installation of a database or MySQL that we will install on OpenShift.
+. To be able to use the project locally but also on OpenShift, we will define another datasource and JDBC driver to use MySQL that we will install on OpenShift.
 . Add a folder `src/main/config-local` containing the application.properties file created.
 +
 [source]
