@@ -25,7 +25,17 @@ mv project $PROJECT_DIR && cd $PROJECT_DIR
 echo "##############################################"
 echo "## Run Forge commands to create the project"
 echo "##############################################"
-$FORGE_PATH/forge -e "run ../scripts/cdstore-forge.fsh"
+$FORGE_PATH/forge -e "run ../scripts/create-cdstore.fsh"
+
+echo "##############################################"
+echo "## Copy static content "
+echo "##############################################"
+cp -r ../scripts/front/modified/ cdfront/src/main/resources/static/
+
+echo "####################################################"
+echo "## Compile project to check if everything works !!!"
+echo "####################################################"
+mvn clean install
 
 cd $CURRENT
 
