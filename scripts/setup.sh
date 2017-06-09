@@ -28,9 +28,10 @@ echo "##############################################"
 $FORGE_PATH/forge -e "run ../scripts/create-cdstore.fsh"
 
 echo "##############################################"
-echo "## Copy static content "
+echo "## Copy static content & SQL data for h2"
 echo "##############################################"
 cp -r ../scripts/front/modified/ cdfront/src/main/resources/static/
+cp -r ../scripts/service/data-h2.sql cdservice/src/main/resources/data.sql
 
 echo "####################################################"
 echo "## Compile project to check if everything works !!!"

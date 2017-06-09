@@ -26,5 +26,8 @@ cd ..
 # ------  CD Store Web Front End [:8081/rest] ---------------
 project-new --named cdfront --type spring-boot --create-static-content=true --port 8081
 
+# Come up to parent project
+cd ~~
+
 # Copy static content
 # cp ../../scripts/front/modified/ src/main/resources/static/
