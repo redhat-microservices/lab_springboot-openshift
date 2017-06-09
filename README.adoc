@@ -258,15 +258,6 @@ project-add-dependencies com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider
 rest-generate-endpoints-from-entities --targets org.cdservice.model.* --generator SPRING_BOOT_JPA_ENTITY
 ----
 
-. Add some config to let Apache CXF to discover the REST classes to be registered like also the path to map with its CXF Servlet.
-  Edit the application.properties file and add these keys
-+
-[source]
-----
-cxf.jaxrs.component-scan=true
-cxf.path=/rest
-----
-
 . Add a JSon Provider bean within the `DemoApplication` java class who will populate the HTTP Body response
 +
 [source]
