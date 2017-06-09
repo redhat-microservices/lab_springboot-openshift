@@ -393,9 +393,7 @@ cp -r ../scripts/front/modified/ cdfront/src/main/resources/static/
 { "cd-service": "http://localhost:8080/rest/catalogs/" }
 ----
 
-## Build and deploy
-
-### Build and run locally
+## Build and deploy locally
 
 . Open 2 terminal in order to start the front & backend
 . cd `cdservice`
@@ -408,11 +406,12 @@ cp -r ../scripts/front/modified/ cdfront/src/main/resources/static/
 
 . Open the project within your browser `http://localhost:8081`
 
-### Deploy on OpenShift
+## Deploy on OpenShift
 
 ### Setup MySQL Database
 
-. Verify first that you are well connected to the `OpenShift` platform
+. TODO : Add step to log on OpenShift locally or using GCP instance
+. Verify first that you are well connected to the `OpenShift` platform by issuing `oc` commands within a terminal
 
   oc status
 
@@ -450,7 +449,7 @@ Remark: As we haven't yet deployed the service, the Catalog DB hasn't been yet c
 
 ### Externalize the Datasource
 
-To externalize the datasource configuration that SpringBoot will use to access the database, we will create a Kubernetes `configMap` resource.
+To externalize the datasource configuration that Spring Boot will use to access the database from the `cdservice` project, we will create a Kubernetes `configMap` resource.
 This `ConfigMap` will contain as input the content of the application.properties file. The resource to be created will be defined under a json `configmap.json` file
 under tje folder `src/main/fabric8`. All the resources included within this folder, will be scanned and used by the Fabric8 Maven Plugin when the application will be deployed on Openshift.
 
@@ -559,12 +558,10 @@ mvn clean fabric8:deploy -Popenshift
 
 Remark : you can retrieve the route address to access your service using this oc client command `oc get route/cdservice`
 
-### Externalize Front Service
+### Modify the Front to access the backend service
 
-The URL to access the service will be specified within the `service.json` file that the AngularJS framework will load when the service `/catalogs`
-will be called.
-
-NOTE: The file isn't mounted as a volume attached to the pod but that could be done using the same mechanism as presented before.
+As we have deployed the `cdservice`, we can know check what we should to allow the `cdfront` application to access the backend.
+As the URL to access the service is specified within the `service.json`, we will change the value of the key to use the route of the service.
 
 . Edit the `service.json` file under `cdfront/src/main/resources/static` folder & modify the following key where the HOST address corresponds to the IP address used
   by your VM machine
