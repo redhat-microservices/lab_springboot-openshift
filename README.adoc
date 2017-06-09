@@ -638,7 +638,7 @@ mvn fabric8:deploy
 . Change the `MY_HOST_IP_ADDRESS` key with the value of the private IP address of your virtual machine
 . Open your browser and verifies that you can access the Front and consult the CDs collection.
 
-### Externalize Front URL address to access the backend (optional)
+### Generate AngularJS Front (optional)
 
 JBoss Forge offers a command which allows to populate an Angular JS Web Front which contains the UI screens
 in order to perform the CRUD operations against the Catalog REST service exposed by the endpoint `http://localhost:8080/rest/catalogs`.
