@@ -206,16 +206,15 @@ mv project workshop && cd workshop
 +
 [source]
 ----
-project-new --named cdservice --type spring-boot --dependencies web --packaging jar
+project-new --named cdservice --type spring-boot
 ----
 
-. Setup the JPA project using as database type is `H2`. The JBoss Forge command will add a maven gav H2 artifact and will fill the application.properties file
-  with the Hibernate properties. No datasource is predefined here as we will only use H2 in memory and locally
-  The command should be executed within the `cdservice` folder.
+. Setup the JPA project using a `H2` database.
+If no database type is specified then `H2` is selected by default. The JBoss Forge command will add a maven GAV H2 artifact and will fill the application.properties file with the Hibernate properties. No datasource is predefined here as we will only use H2 in memory. Note that this command should be executed within the `cdservice` folder, which should be automatically selected after creating the new project.
 +
 [source]
 ----
-jpa-setup --db-type H2
+jpa-setup
 ----
 
 . This command will generate the properties used to configure the Hibernate framework and to access the database
