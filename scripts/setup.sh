@@ -1,18 +1,19 @@
 #!/usr/bin/env bash
 
 #
-# Usage: ./scripts/setup.sh <PROJECT_DIR> <FORGE_PATH>
-# E.g. ./scripts/setup.sh demo ~/Temp/dev/forge/bin
+# Usage: ./scripts/setup.sh <PROJECT_DIR> <FORGE_PATH> <SCAFFOLD_BOOLEAN>
+# E.g. ./scripts/setup.sh demo ~/Temp/dev/forge/bin true
 #
 
 PROJECT_DIR=${1:-demo}
 FORGE_PATH=$2
+SCAFFOLD=$3
 
 export CURRENT=$(pwd)
 export FORGE_PATH=$2
 
 if [ -d $PROJECT_DIR ]; then
- echo "Deleting $PROJECT_DIR directory ...."
+ echo "## Deleting $PROJECT_DIR directory ...."
  rm -rf $PROJECT_DIR
 fi
 
@@ -22,16 +23,28 @@ echo "##############################################"
 mvn archetype:generate -DarchetypeGroupId=org.codehaus.mojo.archetypes -DarchetypeArtifactId=pom-root -DarchetypeVersion=RELEASE -DinteractiveMode=false -DgroupId=org.cdstore -DartifactId=project -Dversion=1.0.0-SNAPSHOT
 mv project $PROJECT_DIR && cd $PROJECT_DIR
 
-echo "##############################################"
-echo "## Run Forge commands to create the project"
-echo "##############################################"
-$FORGE_PATH/forge -e "run ../scripts/create-cdstore.fsh"
+if [ $SCAFFOLD = true ]; then
+    echo "##############################################"
+    echo "## Run Forge commands to create the project & Scaffold"
+    echo "##############################################"
+    $FORGE_PATH/forge -e "run ../scripts/create-cdstore-scaffold.fsh"
+  else
+    echo "##############################################"
+    echo "## Run Forge commands to create the project "
+    echo "##############################################"
+    $FORGE_PATH/forge -e "run ../scripts/create-cdstore.fsh"
+fi
 
 echo "##############################################"
 echo "## Copy static content & SQL data for h2"
 echo "##############################################"
-cp -r ../scripts/front/modified/ cdfront/src/main/resources/static/
 cp -r ../scripts/service/data-h2.sql cdservice/src/main/resources/data.sql
+
+if [ $SCAFFOLD = true ]; then
+   mv cdservice/src/main/webapp/* cdfront/src/main/resources/static/
+ else
+   cp -r ../scripts/front/modified/ cdfront/src/main/resources/static/
+fi
 
 echo "####################################################"
 echo "## Compile project to check if everything works !!!"

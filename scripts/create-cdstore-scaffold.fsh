@@ -25,6 +25,10 @@ rest-generate-endpoints-from-entities --targets org.cdservice.model.* --generato
 # Enable CORS
 rest-new-cross-origin-resource-sharing-filter
 
+# Scaffold code
+scaffold-setup --provider AngularJS
+scaffold-generate --provider AngularJS --generate-rest-resources --targets org.cdservice.model.*
+
 # Come up to top level so we can create a new project
 cd ~~
 cd ..

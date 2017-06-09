@@ -248,22 +248,6 @@ jpa-new-field --named publication_date --type java.util.Date --temporalType DATE
 rest-generate-endpoints-from-entities --targets org.cdservice.model.* --generator SPRING_BOOT_JPA_ENTITY
 ----
 
-. Add a JSon Provider bean within the `DemoApplication` java class who will populate the HTTP Body response
-+
-[source]
-----
-import org.springframework.context.annotation.Bean;
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-
-@SpringBootApplication
-public class DemoApplication {
-
-	@Bean
-	public JacksonJsonProvider config() {
-		return new JacksonJsonProvider();
-	}
-----
-
 . As the service will be called from a resources which is not running from the same HTTP Server and domain, a REST filter should be created to add the CORS Headers
 +
 [source]
