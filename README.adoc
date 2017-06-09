@@ -152,22 +152,6 @@ The first thing to be done is to git clone locally the project
 
   cd lab_springboot-openshift
 
-## All in one
-
-The following script (if you want) can help you to setup partially the  project in one step. We invite you to first look to the decomposed steps in order to build the project step-by-step before
-to use it.
-
-[source]
-----
- ./scripts/setup.sh <PROJECT_NAME>
- where <PROJECT_NAME> corresponds to the name of the directory where the project will be created
-----
-
-NOTE: If you want to create the project using another version of JBoss Forge deployed under a different path on your machine, you can pass the parameter to access the forge executable using an env var
-      `FORGE_PATH=$HOME/MyForge/forge ./scripts/setup.sh demo`
-
-NOTE: To use the scaffold option, pass the boolean true to the command ` ./scripts/setup.sh demo true`
-
 ## Decomposed steps
 
 ### Parent project
@@ -399,6 +383,22 @@ cp -r ../scripts/front/modified/ cdfront/src/main/resources/static/
 ----
 { "cd-service": "http://localhost:8080/rest/catalogs/" }
 ----
+
+## All in one
+
+The following script (if you want) can help you to setup partially the  project in one step. We invite you to first look to the decomposed steps in order to build the project step-by-step before
+to use it.
+
+[source]
+----
+ ./scripts/setup.sh <PROJECT_NAME>
+ where <PROJECT_NAME> corresponds to the name of the directory where the project will be created
+----
+
+NOTE: If you want to create the project using another version of JBoss Forge deployed under a different path on your machine, you can pass the parameter to access the forge executable using an env var
+      `FORGE_PATH=$HOME/MyForge/forge ./scripts/setup.sh demo`
+
+NOTE: To use the scaffold option, pass the boolean true to the command ` ./scripts/setup.sh demo true`
 
 ## Build and deploy locally
 
