@@ -166,6 +166,8 @@ to use it.
 NOTE: If you want to create the project using another version of JBoss Forge deployed under a different path on your machine, you can pass the parameter to access the forge executable using an env var
       `FORGE_PATH=$HOME/MyForge/forge ./scripts/setup.sh demo`
 
+NOTE: To use the scaffold option, pass the boolean true to the command ` ./scripts/setup.sh demo true`
+
 ## Decomposed steps
 
 ### Parent project
