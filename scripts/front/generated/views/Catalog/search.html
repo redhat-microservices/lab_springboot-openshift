@@ -58,7 +58,7 @@
                     <th>Title</th>
                     <th>Description</th>
                     <th>Price</th>
-                    <th>Publication Date</th>
+                    <th>Publication_date</th>
                 </tr>
             </thead>
             <tbody id="search-results-body">
@@ -67,7 +67,7 @@
                     <td><a href="#/Catalogs/edit/{{result.id}}">{{result.title}}</a></td>
                     <td><a href="#/Catalogs/edit/{{result.id}}">{{result.description}}</a></td>
                     <td><a href="#/Catalogs/edit/{{result.id}}">{{result.price}}</a></td>
-                    <td><a href="#/Catalogs/edit/{{result.id}}">{{result.publicationDate| date:'yyyy-MM-dd HH:mm:ss Z'}}</a></td>
+                    <td><a href="#/Catalogs/edit/{{result.id}}">{{result.publication_date| date:'mediumDate'}}</a></td>
                 </tr>
             </tbody>
         </table>

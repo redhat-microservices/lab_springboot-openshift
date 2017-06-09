@@ -4,10 +4,12 @@ angular.module('cdservice',['ngRoute','ngResource'])
   .config(['$routeProvider', function($routeProvider) {
     $routeProvider
       .when('/',{templateUrl:'views/landing.html',controller:'LandingPageController'})
-      .when('/Catalogs', {templateUrl:'views/Catalog/search.html', controller:'SearchCatalogController'})
+      .when('/Catalogs',{templateUrl:'views/Catalog/search.html',controller:'SearchCatalogController'})
       .when('/Catalogs/new',{templateUrl:'views/Catalog/detail.html',controller:'NewCatalogController'})
       .when('/Catalogs/edit/:CatalogId',{templateUrl:'views/Catalog/detail.html',controller:'EditCatalogController'})
-      .otherwise({redirectTo: '/'});
+      .otherwise({
+        redirectTo: '/'
+      });
   }])
   .controller('LandingPageController', function LandingPageController() {
   })

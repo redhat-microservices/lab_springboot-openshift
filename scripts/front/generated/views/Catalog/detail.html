@@ -35,11 +35,11 @@
         </div>
     </div>
 
-    <div class="form-group" ng-class="{'has-error': CatalogForm.publicationDate.$invalid}">
-        <label for="publicationDate" class="col-sm-2 control-label">Publication Date</label>
-        <div id="publicationDateControls" class="col-sm-10">
-            <datetime id="publicationDate" name="publicationDate" ng-model="catalog.publicationDate" placeholder="Enter the Catalog Publication Date"></datetime>
-            <span class="help-block error" ng-show="CatalogForm.publicationDate.$error.datetimeFormat">does not match format "yyyy-MM-dd hh:mm:ss" (e.g. 2013-12-01 22:00:00)</span>
+    <div class="form-group" ng-class="{'has-error': CatalogForm.publication_date.$invalid}">
+        <label for="publication_date" class="col-sm-2 control-label">Publication_date</label>
+        <div id="publication_dateControls" class="col-sm-10">
+            <date id="publication_date" name="publication_date" ng-model="catalog.publication_date" placeholder="Enter the Catalog Publication_date"></date>
+            <span class="help-block error" ng-show="CatalogForm.publication_date.$error.dateFormat">does not match format "yyyy-MM-dd" (e.g. 2013-12-01)</span>
         </div>
     </div>
 
