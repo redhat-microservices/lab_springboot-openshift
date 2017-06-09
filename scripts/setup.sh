@@ -16,14 +16,16 @@ if [ -d $PROJECT_DIR ]; then
  rm -rf $PROJECT_DIR
 fi
 
-echo "Creating $PROJECT_DIR directory ...."
-mkdir $PROJECT_DIR && cd $PROJECT_DIR
-echo "Create Maven Parent POM under $PROJECT_DIR"
+echo "##############################################"
+echo "## Create Maven Parent POM under $PROJECT_DIR"
+echo "##############################################"
 mvn archetype:generate -DarchetypeGroupId=org.codehaus.mojo.archetypes -DarchetypeArtifactId=pom-root -DarchetypeVersion=RELEASE -DinteractiveMode=false -DgroupId=org.cdstore -DartifactId=project -Dversion=1.0.0-SNAPSHOT
-mv project workshop && cd workshop
+mv project $PROJECT_DIR && cd $PROJECT_DIR
 
-echo "Run Forge commands to create the project"
-$FORGE_PATH/forge -e "run ../../scripts/cdstore-forge.fsh"
+echo "##############################################"
+echo "## Run Forge commands to create the project"
+echo "##############################################"
+$FORGE_PATH/forge -e "run ../scripts/cdstore-forge.fsh"
 
 cd $CURRENT
 
