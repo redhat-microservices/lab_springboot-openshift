@@ -159,8 +159,12 @@ to use it.
 
 [source]
 ----
- ./scripts/setup.sh
+ ./scripts/setup.sh <PROJECT_NAME>
+ where <PROJECT_NAME> corresponds to the name of the directory where the project will be created
 ----
+
+NOTE: IF you must execute the command using another version o JBoss Forge installed on tour machine, you can also pass the pass to access the forge executable using an env var
+      `FORGE_PATH=$HOME/MyForge/forge ./scripts/setup.sh demo`
 
 ## Decomposed steps
 

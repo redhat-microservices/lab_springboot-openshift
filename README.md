@@ -18,5 +18,5 @@ $FORGE_PATH/forge -r org.jboss.forge.addon:spring-boot,1.0.0-SNAPSHOT
 # Create Project
 
 ```
-./scripts/setup.sh
+FORGE_PATH=~/Temp/dev/forge/bin ./scripts/setup.sh demo
 ```

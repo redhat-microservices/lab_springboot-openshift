@@ -1,20 +1,31 @@
 #!/usr/bin/env bash
 
 #
-# Usage: ./scripts/setup.sh <PROJECT_DIR> <FORGE_PATH> <SCAFFOLD_BOOLEAN>
+# Usage: ./scripts/setup.sh <PROJECT_DIR> <SCAFFOLD_BOOLEAN>
 # E.g.
-# To scaffold, simply add the tru boolean
-# ./scripts/setup.sh demo ~/Temp/dev/forge/bin true
+# To scaffold, simply add the true boolean
+# ./scripts/setup.sh demo true
+#
 # By default, nos scaffolding will take place
-# ./scripts/setup.sh demo ~/Temp/dev/forge/bin
+# ./scripts/setup.sh demo
+#
+# You can also use another JBoss Forge path
+# FORGE_PATH=$HOME/MyForge/PATH/forge ./scripts/setup.sh demo
 #
 
 PROJECT_DIR=${1:-demo}
-FORGE_PATH=$2
-SCAFFOLD=${3:-false}
+SCAFFOLD=${2:-false}
 
 export CURRENT=$(pwd)
-export FORGE_PATH=$2
+
+if [ -n $FORGE_PATH ]; then
+    FORGE_CMD="$(which forge) -e"
+  else
+    FORGE_CMD="$FORGE_PATH -e"
+fi
+
+echo "CMD : $FORGE_CMD"
+
 
 if [ -d $PROJECT_DIR ]; then
  echo "## Deleting $PROJECT_DIR directory ...."
@@ -31,12 +42,12 @@ if [ $SCAFFOLD = true ]; then
     echo "##############################################"
     echo "## Run Forge commands to create the project & Scaffold"
     echo "##############################################"
-    $FORGE_PATH/forge -e "run ../scripts/create-cdstore-scaffold.fsh"
+    exec $FORGE_CMD "run ../scripts/create-cdstore-scaffold.fsh"
   else
     echo "##############################################"
     echo "## Run Forge commands to create the project "
     echo "##############################################"
-    $FORGE_PATH/forge -e "run ../scripts/create-cdstore.fsh"
+    exec $FORGE_CMD "run ../scripts/create-cdstore.fsh"
 fi
 
 echo "##############################################"
@@ -53,7 +64,7 @@ fi
 echo "####################################################"
 echo "## Compile project to check if everything works !!!"
 echo "####################################################"
-mvn clean install
+# mvn clean install
 
 cd $CURRENT
 
