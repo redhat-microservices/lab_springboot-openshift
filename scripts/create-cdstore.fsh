@@ -25,6 +25,5 @@ rest-generate-endpoints-from-entities --targets org.cdservice.model.* --generato
 # Enable CORS
 rest-new-cross-origin-resource-sharing-filter
 
-# Come up to top level so we can create a new project
 cd ~~
 cd ..

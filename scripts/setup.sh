@@ -32,12 +32,12 @@ if [ $SCAFFOLD = true ]; then
     echo "##############################################"
     echo "## Run Forge commands to create the project & Scaffold"
     echo "##############################################"
-    exec forge -e "run ../scripts/create-cdstore-scaffold.fsh"
+    forge -e "run ../scripts/create-cdstore-scaffold.fsh"
   else
     echo "##############################################"
     echo "## Run Forge commands to create the project "
     echo "##############################################"
-    exec forge -e "run ../scripts/create-cdstore.fsh"
+    forge -e "run ../scripts/create-cdstore.fsh"
 fi
 
 echo "##############################################"
