@@ -28,7 +28,7 @@ oc new-app --template=mysql-persistent \
     -p MYSQL_DATABASE=catalogdb
 
 echo "##########################################"
-echo "Create missing files, deps (bootstrap.properties/service & route"
+echo "Create missing files, deps (bootstrap.properties/service & route)"
 echo "##########################################"
 cd cdservice
 

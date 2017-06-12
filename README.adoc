@@ -218,17 +218,19 @@ spring.jpa.properties.hibernate.hbm2ddl.auto=create-drop
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect
 ----
 
-. Create a Catalog Java (but also entity) class where the fields will be defined as such. It is not required to define the field with the PRIMARY key as it will be created
-  by default by the JBoss Forge command.
+. Create a Catalog Java (but also entity) class where the fields will be defined as such. It is not required to
+define the field with the PRIMARY key as it will be created by default by the JBoss Forge command. Note that Forge
+will "switch" to the newly created entity after you perform  a `jpa-new-entity` command so you don't need to specify
+the target entity (with `--target-entity`) when creating new fields.
 +
 [source]
 ----
 jpa-new-entity --named Catalog
-jpa-new-field --named artist --target-entity org.cdservice.model.Catalog
-jpa-new-field --named title --target-entity org.cdservice.model.Catalog
-jpa-new-field --named description --length 2000 --target-entity org.cdservice.model.Catalog
-jpa-new-field --named price --type java.lang.Float --target-entity org.cdservice.model.Catalog
-jpa-new-field --named publication_date --type java.util.Date --temporalType DATE --target-entity org.cdservice.model.Catalog
+jpa-new-field --named artist
+jpa-new-field --named title
+jpa-new-field --named description --length 2000
+jpa-new-field --named price --type java.lang.Float
+jpa-new-field --named publication_date --type java.util.Date --temporalType DATE
 ----
 
 . As we would like to expose our Catalog of CDs as a Service published behind as a REST endpoint, we will use another JBoss Forge command responsible
@@ -452,13 +454,17 @@ mysql> SELECT t.* FROM catalogdb.Catalog t;
 ERROR 1146 (42S02): Table 'catalogdb.Catalog' doesn't exist
 ----
 
-Remark: As we haven't yet deployed the service, the Catalog DB hasn't been yet created by the Hibernate framework.
+As we haven't yet deployed the service, the Catalog DB hasn't been yet created by the Hibernate framework so this
+message is expected. Note also that there shouldn't be any spaces between the `-p` option and the password you
+provide to the `mysql` command as otherwise, this will fail.
 
 ### Externalize the Datasource
 
-To externalize the datasource configuration that Spring Boot will use to access the database from the `cdservice` project, we will create a Kubernetes `configMap` resource.
-This `ConfigMap` will contain as input the content of the application.properties file. The resource to be created will be defined under a json `configmap.json` file
-under tje folder `src/main/fabric8`. All the resources included within this folder, will be scanned and used by the Fabric8 Maven Plugin when the application will be deployed on Openshift.
+To externalize the datasource configuration that Spring Boot will use to access the database from the
+`cdservice` project, we will create a Kubernetes `configMap` resource. This `ConfigMap` will contain as input the
+content of the application.properties file. The resource to be created will be defined under a `configmap.json` JSON
+file under the `src/main/fabric8` folder. All the resources included within this folder, will be scanned and used by
+the Fabric8 Maven Plugin when the application will be deployed on Openshift.
 
 . Create under the directory `src/main/fabric8` of the `cdservice` maven module a `configmap.yml` file.
 +
@@ -499,15 +505,16 @@ EOF
 ----
 
 Remark: As you can see, the hostname defined for the connection-url corresponds to the `mysql` service published on OpenShift (`oc get svc/mysql`).
-This name will be resolved by the internal DNS server exposed by OpenShift when the application will issue a request to this machine.
+This name will be resolved by the internal DNS server exposed by OpenShift when the application issues a request to
+this machine.
 
 . Add dependency to the project to use Spring Cloud Kubernetes Core & config lib which allows Spring Boot to access the Kubernetes Config Map to read the application properties
   keys
 +
 [source]
 ----
-project-add-repository --url http://repo.spring.io/libs-snapshot-local --named spring-cloud-snapshot
-project-add-dependencies org.springframework.cloud:spring-cloud-starter-kubernetes-config:0.2.0.BUILD-SNAPSHOT
+forge -e "project-add-repository --url http://repo.spring.io/libs-snapshot-local --named spring-cloud-snapshot"
+forge -e "project-add-dependencies org.springframework.cloud:spring-cloud-starter-kubernetes-config:0.2.0.BUILD-SNAPSHOT"
 ----
 
 . Add a `bootstrap.properties` to specify the name of the application to be used which corresponds to the key name of the ConfigMap to search. For our workshop,
@@ -522,7 +529,8 @@ spring.application.name=cdservice
 EOF
 ----
 
-. Add the role `view` to the user `serviceaccount` to let the Spring Cloud Kubernetes API to access the ConfigMap exposed by the Kuberntes Api
+. Add the role `view` to the user `serviceaccount` to let the Spring Cloud Kubernetes API to access the ConfigMap
+exposed by the Kubernetes API
 +
 [source]
 ----
@@ -555,7 +563,7 @@ EOF
 +
 [source]
 ----
-fabric8-setup --integration-test=false
+forge -e "fabric8-setup --integration-test=false"
 ----
 
 . Deploy the `cdservice` project on OpenShift using this maven instruction
@@ -644,11 +652,12 @@ fabric8-setup --integration-test=false
 mvn fabric8:deploy
 ----
 
-. Check that you can access the HTML page of the Front. Remark : you can get the route address using the command `oc get route/cdfront-snowcamp`
+. Check that you can access the HTML page of the Front. Remark : you can get the route address using the command `oc
+get route/cdfront`
 
-  http://cdfront-snowcamp.MY_HOST_IP_ADDRESS.xip.io/
+  http://cdfront-workshop.MY_HOST_IP_ADDRESS.nip.io/
 
-. Change the `MY_HOST_IP_ADDRESS` key with the value of the private IP address of your virtual machine
+. Change the `MY_HOST_IP_ADDRESS` key with the value of the private IP address of your virtual machine (`minishift ip`)
 . Open your browser and verifies that you can access the Front and consult the CDs collection.
 
 ### Generate AngularJS Front (optional)
