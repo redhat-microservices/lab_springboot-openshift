@@ -19,7 +19,7 @@ SCAFFOLD=${2:-false}
 export CURRENT=$(pwd)
 
 if [ -n $FORGE_PATH ]; then
-    FORGE_CMD="$(which forge) -e"
+    FORGE_CMD="forge -e"
   else
     FORGE_CMD="$FORGE_PATH -e"
 fi
