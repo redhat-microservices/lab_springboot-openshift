@@ -10,7 +10,7 @@
 # ./scripts/setup.sh demo
 #
 # You can also use another JBoss Forge path
-# FORGE_PATH=$HOME/MyForge/PATH/forge ./scripts/setup.sh demo
+# FORGE_PATH=$HOME/MyForge_PATH ./scripts/setup.sh demo
 #
 
 PROJECT_DIR=${1:-demo}
@@ -19,13 +19,10 @@ SCAFFOLD=${2:-false}
 export CURRENT=$(pwd)
 
 if [ -n $FORGE_PATH ]; then
-    FORGE_CMD="forge -e"
+    FORGE_HOME="$HOME/.forge"
   else
-    FORGE_CMD="$FORGE_PATH -e"
+    FORGE_HOME=$FORGE_PATH
 fi
-
-echo "CMD : $FORGE_CMD"
-
 
 if [ -d $PROJECT_DIR ]; then
  echo "## Deleting $PROJECT_DIR directory ...."
@@ -42,12 +39,12 @@ if [ $SCAFFOLD = true ]; then
     echo "##############################################"
     echo "## Run Forge commands to create the project & Scaffold"
     echo "##############################################"
-    exec $FORGE_CMD "run ../scripts/create-cdstore-scaffold.fsh"
+    exec forge -e "run ../scripts/create-cdstore-scaffold.fsh"
   else
     echo "##############################################"
     echo "## Run Forge commands to create the project "
     echo "##############################################"
-    exec $FORGE_CMD "run ../scripts/create-cdstore.fsh"
+    exec forge -e "run ../scripts/create-cdstore.fsh"
 fi
 
 echo "##############################################"
