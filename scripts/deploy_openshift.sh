@@ -3,7 +3,7 @@
 #
 # Prerequisite : Install jq --> https://stedolan.github.io/jq/download/
 # brew install jq
-#  ./deploy_openshift.sh <PROJECT_DIR>
+#  ./scripts/deploy_openshift.sh <PROJECT_DIR>
 # PATH of the PROJECT directory
 #
 
@@ -33,7 +33,7 @@ echo "##########################################"
 cd cdservice
 
 mkdir -p src/main/config-openshift
-cp ../../scripts/service/data-mysql.sql cdservice/src/main/config-openshift/data.sql
+cp ../../scripts/service/data-mysql.sql src/main/config-openshift/data.sql
 
 touch src/main/config-openshift/bootstrap.properties
 cat << 'EOF' > src/main/config-openshift/bootstrap.properties
@@ -43,7 +43,7 @@ EOF
 mkdir -p src/main/fabric8
 touch src/main/fabric8/configmap.yml
 
-forge -e "project-remove-dependencies com.h2database:h2"
+forge -e "project-remove-dependencies com.h2database:h2:"
 forge -e "project-add-dependencies org.springframework.cloud:spring-cloud-starter-kubernetes-config:0.2.0.BUILD-SNAPSHOT"
 
 cat << 'EOF' > src/main/fabric8/configmap.yml
@@ -104,9 +104,13 @@ xml="<profiles>\
 
 sed -i.bak "s|</project>|$xml|" pom.xml
 
+mvn fabric8:deploy -Popenshift -DskipTests=true
+
+sleep 1m
+
 cd ../cdfront
 APP=$(oc get route cdservice -o json | jq '.spec.host' | tr -d \"\")
-echo '{ "cd-service": "$APP/rest/catalogs/" }' > src/main/resources/static/service.json
+echo "{ \"cd-service\": \"http://$APP/rest/catalogs/\" }" > src/main/resources/static/service.json
 
 mkdir -p src/main/fabric8/
 touch src/main/fabric8/svc.yml
