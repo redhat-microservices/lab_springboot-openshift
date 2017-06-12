@@ -10,19 +10,12 @@
 # ./scripts/setup.sh demo
 #
 # You can also use another JBoss Forge path
-# FORGE_PATH=$HOME/MyForge_PATH ./scripts/setup.sh demo
+# FORGE_HOME=$HOME/.forge ./scripts/setup.sh demo
 #
 
 PROJECT_DIR=${1:-demo}
 SCAFFOLD=${2:-false}
-
 export CURRENT=$(pwd)
-
-if [ -n $FORGE_PATH ]; then
-    FORGE_HOME="$HOME/.forge"
-  else
-    FORGE_HOME=$FORGE_PATH
-fi
 
 if [ -d $PROJECT_DIR ]; then
  echo "## Deleting $PROJECT_DIR directory ...."
