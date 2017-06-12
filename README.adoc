@@ -108,8 +108,8 @@ using the Fabric8 maven plugin
 [source]
 ----
 brew install jboss-forge
-forge -e "addon-install --coordinate io.fabric8.forge:devops,2.3.88"
-forge -e "addon-install --coordinate org.jboss.forge.addon:spring-boot,1.0.0-SNAPSHOT"
+forge -i io.fabric8.forge:devops,2.3.88
+forge -i org.jboss.forge.addon:spring-boot,1.0.0-SNAPSHOT
 ----
 
 # Goals
