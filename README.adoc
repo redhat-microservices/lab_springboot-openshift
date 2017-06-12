@@ -509,6 +509,16 @@ This name will be resolved by the internal DNS server exposed by OpenShift when 
 project-add-dependencies org.springframework.cloud:spring-cloud-starter-kubernetes-config:0.2.0.BUILD-SNAPSHOT
 ----
 
+. Add bootsrap.properties to specify the name of the application
++
+[source]
+----
+touch src/main/config-openshift/bootsrap.properties
+
+cat << 'EOF' > src/main/config-openshift/bootsrap.properties
+spring.application.name=cdservice
+----
+
 . Add the role `view` to the user `serviceaccount` to let the Spring Cloud Kubernetes API to access the ConfigMap exposed by the Kuberntes Api
 +
 [source]
