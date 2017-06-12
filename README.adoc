@@ -513,10 +513,11 @@ project-add-dependencies org.springframework.cloud:spring-cloud-starter-kubernet
 +
 [source]
 ----
-touch src/main/config-openshift/bootsrap.properties
+touch src/main/config-openshift/bootstrap.properties
 
-cat << 'EOF' > src/main/config-openshift/bootsrap.properties
+cat << 'EOF' > src/main/config-openshift/bootstrap.properties
 spring.application.name=cdservice
+EOF
 ----
 
 . Add the role `view` to the user `serviceaccount` to let the Spring Cloud Kubernetes API to access the ConfigMap exposed by the Kuberntes Api
