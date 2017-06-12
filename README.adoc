@@ -509,7 +509,7 @@ This name will be resolved by the internal DNS server exposed by OpenShift when 
 project-add-dependencies org.springframework.cloud:spring-cloud-starter-kubernetes-config:0.2.0.BUILD-SNAPSHOT
 ----
 
-. Add bootsrap.properties to specify the name of the application
+. Add bootstrap.properties to specify the name of the application to be used and which corresponds to the key of the ConfigMap to search
 +
 [source]
 ----
