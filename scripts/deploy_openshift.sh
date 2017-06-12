@@ -104,7 +104,10 @@ xml="<profiles>\
 
 sed -i.bak "s|</project>|$xml|" pom.xml
 
-mvn fabric8:deploy -Popenshift -DskipTests=true
+echo "##########################################"
+echo "Install cdservice "
+echo "##########################################"
+mvn clean compile fabric8:deploy -Popenshift -DskipTests=true
 
 sleep 1m
 
@@ -143,6 +146,9 @@ spec:
     name: ${project.artifactId}
 EOF
 
+echo "##########################################"
+echo "Install cdfront "
+echo "##########################################"
 mvn fabric8:deploy
 
 cd $CURRENT
