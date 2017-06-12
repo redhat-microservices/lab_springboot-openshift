@@ -35,13 +35,13 @@ if [ $SCAFFOLD = true ]; then
     forge -e "run ../scripts/create-cdstore-scaffold.fsh"
   else
     echo "##############################################"
-    echo "## Run Forge commands to create the project "
+    echo "## Run Forge commands to create the project   "
     echo "##############################################"
     forge -e "run ../scripts/create-cdstore.fsh"
 fi
 
 echo "##############################################"
-echo "## Copy static content & SQL data for h2"
+echo "## Copy static content & SQL data for h2      "
 echo "##############################################"
 cp -r ../scripts/service/data-h2.sql cdservice/src/main/resources/data.sql
 
@@ -52,9 +52,14 @@ if [ $SCAFFOLD = true ]; then
 fi
 
 echo "####################################################"
-echo "## Compile project to check if everything works !!!"
+echo "## Compile project to check if everything works  !!!"
 echo "####################################################"
-# mvn clean install
+mvn clean install
+
+echo "####################################################"
+echo "## Enable F-m-p  #"
+echo "####################################################"
+forge -e "run ../scripts/enable-fabric8.fsh"
 
 cd $CURRENT
 
