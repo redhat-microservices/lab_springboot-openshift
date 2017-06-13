@@ -1,18 +1,16 @@
 package org.cdservice.rest;
 
+import javax.ws.rs.ext.Provider;
+import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
-import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.ext.Provider;
-
 import org.springframework.stereotype.Component;
 
-/**
- * @author <a href="mailto:cmoullia@redhat.com">Charles Moulliard</a>
- */
-@Component
 @Provider
-public class CorsFilter implements ContainerResponseFilter {
+@Component
+public class NewCrossOriginResourceSharingFilter
+		implements
+			ContainerResponseFilter {
 
 	@Override
 	public void filter(ContainerRequestContext request,

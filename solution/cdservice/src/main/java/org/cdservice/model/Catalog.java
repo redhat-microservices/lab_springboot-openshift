@@ -114,11 +114,11 @@ public class Catalog implements Serializable {
 		this.price = price;
 	}
 
-	public Date getPublicationDate() {
+	public Date getPublication_date() {
 		return publication_date;
 	}
 
-	public void setPublicationDate(Date publication_date) {
+	public void setPublication_date(Date publication_date) {
 		this.publication_date = publication_date;
 	}
 

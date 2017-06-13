@@ -117,4 +117,4 @@
 	</build>
 
 
-<profiles>    <profile>      <id>local</id>      <dependencies>        <dependency>          <groupId>com.h2database</groupId>          <artifactId>h2</artifactId>        </dependency>      </dependencies>      <build>        <resources>          <resource>            <directory>src/main/config-local</directory>          </resource>          <resource>            <directory>src/main/resources</directory>          </resource>        </resources>      </build>    </profile>    <profile>      <id>openshift</id>      <dependencies>        <dependency>          <groupId>mysql</groupId>          <artifactId>mysql-connector-java</artifactId>        </dependency>      </dependencies>      <build>        <resources>          <resource>            <directory>src/main/config-openshift</directory>          </resource>          <resource>            <directory>src/main/resources</directory>          </resource>        </resources>      </build>    </profile>  </profiles></project>
+</project>

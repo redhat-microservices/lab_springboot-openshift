@@ -1,1 +1,1 @@
-{ "cd-service": "http://localhost:8080/rest/catalogs/" }
+{ "cd-service": "http://cdservice-workshop.apps.35.187.106.198.nip.io/rest/catalogs/" }

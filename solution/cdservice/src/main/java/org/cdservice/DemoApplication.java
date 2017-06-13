@@ -2,8 +2,8 @@ package org.cdservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 public class DemoApplication {
@@ -13,7 +13,7 @@ public class DemoApplication {
 	}
 
 	@Bean
-	public JacksonJsonProvider Config() {
+	public JacksonJsonProvider config() {
 		return new JacksonJsonProvider();
 	}
 }

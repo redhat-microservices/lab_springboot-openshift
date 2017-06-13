@@ -19,13 +19,13 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
-import org.cdservice.model.Catalog;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.cdservice.model.Catalog;
 
 /**
- * 
+ *
  */
 @Path("/catalogs")
 @Component

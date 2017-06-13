@@ -4,11 +4,11 @@ data:
   application.properties: |-
     cxf.jaxrs.component-scan=true
     cxf.path=/rest
-    
+
     spring.datasource.url=jdbc\:mysql\://mysql\:3306/catalogdb
     spring.datasource.username=mysql
     spring.datasource.password=mysql
-    
+
     spring.jpa.properties.hibernate.transaction.flush_before_completion=true
     spring.jpa.properties.hibernate.show_sql=true
     spring.jpa.properties.hibernate.format_sql=true
