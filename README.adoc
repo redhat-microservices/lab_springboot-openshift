@@ -192,7 +192,7 @@ mv project workshop && cd workshop
   The following command must be executed within the Forge shell or by passing the command using this convention
   `forge -e "..."` where `...` corresponds to a Forge command.
 +
-```sh
+```Emacs Lisp
 project-new --named cdservice --type spring-boot
 ```
 
