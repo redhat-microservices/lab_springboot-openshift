@@ -7,7 +7,7 @@
 # ./scripts/all.sh -a https://console.35.187.106.198.nip.io:8443 -t TOKEN
 #
 
-while getopts aupt option
+while getopts a::u::p::t:: option
 do
         case "${option}"
         in
@@ -30,6 +30,13 @@ if [ -z "$password" ];then
   password="admin"
 fi
 
+echo "############################"
+echo "API : $api"
+echo "User : $user"
+echo "Password : $password"
+echo "Token : $token"
+echo "############################"
+
 echo "Log on to OpenShift Machine"
 if [ "$token" != "" ]; then
    echo "oc login $api --token=$token"
@@ -39,7 +46,12 @@ else
    oc login $api -u $user -p $password
 fi
 
-oc delete project/workshop
+echo "##########################################"
+echo "## Log on to openshift - minishift, create workshop project/namespace and assign role view"
+echo "##########################################"
+oc login https://$(minishift ip):8443 -u admin -p admin
+oc new-project workshop
+oc policy add-role-to-user view -n $(oc project -q) -z default
 
 ./scripts/create_cdstore.sh demo
 ./scripts/deploy_on_openshift.sh

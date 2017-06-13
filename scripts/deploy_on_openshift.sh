@@ -13,13 +13,6 @@ export CURRENT=$(pwd)
 cd $PROJECT_DIR
 
 echo "##########################################"
-echo "## Log on to openshift - minishift, create workshop project/namespace and assign role view"
-echo "##########################################"
-oc login https://$(minishift ip):8443 -u admin -p admin
-oc new-project workshop
-oc policy add-role-to-user view -n $(oc project -q) -z default
-
-echo "##########################################"
 echo "Deploy the MySQL Server"
 echo "##########################################"
 oc new-app --template=mysql-persistent \
