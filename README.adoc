@@ -30,7 +30,7 @@ To create the Virtual Machine, open a Terminal and execute this command to creat
 
 NOTE: If you have installed xhyve on your laptop, you can remove the `--vm-driver` parameter from the command line
 
-[source]
+[source,shell]
 ----
 minishift config set memory 3000
 minishift config set vm-driver virtualbox
@@ -465,7 +465,7 @@ the Fabric8 Maven Plugin when the application will be deployed on Openshift.
 
 . Create under the directory `src/main/fabric8` of the `cdservice` maven module a `configmap.yml` file.
 +
-[source]
+[source,yaml]
 ----
 cd cdservice
 mkdir -p src/main/fabric8
@@ -480,7 +480,7 @@ EOF
 
 . Copy the content of the `application.properties` file within the `config.yaml` file after the key `data:` and next delete it
 +
-[source]
+[source,yaml]
 ----
 metadata:
   name: ${project.artifactId}
@@ -538,7 +538,7 @@ oc policy add-role-to-user view -n $(oc project -q) -z default
 . In order to access our cdservice outside of the pod/docker container, from the host, we will use the HAProxy deployed by OpenShift to route the traffic from the host the the VM.
   Create a `route.yml` file under the `src/main/fabric8` to tell to OpenShift to create a route and specifies the target port which is `8080`
 +
-[source]
+[source,yaml]
 ----
 touch src/main/fabric8/route.yml
 
@@ -617,7 +617,7 @@ EOF
 
 . Create a `route.yml` file under the `src/main/fabric8` to tell to OpenShift to create a route
 +
-[source]
+[source,yaml]
 ----
 touch src/main/fabric8/route.yml
 
@@ -680,7 +680,7 @@ scaffold-generate --provider AngularJS --generate-rest-resources --targets org.c
 . Create this `config.js` file within the directory scripts containing a `$http.get` request to access the content
   of the json file which contains the key `cd-service`. This key will contain the hostname or service name to be accessed
 
-[source]
+[source,javascript]
 ----
 touch src/main/resources/static/services/config.js
 
@@ -710,7 +710,7 @@ EOF
 
 . Modify the `scripts/services/CatalogFactory.js` to use the function `config` instead of the hard coded value
 
-[source]
+[source,javascript]
 ----
 angular.module('cdservice').factory('CatalogResource', function ($resource, config) {
   return $resource(config.getApiUrl() + ':CatalogId', { CatalogId: '@id' }, {
@@ -723,7 +723,7 @@ angular.module('cdservice').factory('CatalogResource', function ($resource, conf
 ----
 
 . Update the routeProvider of the `app.js` script to access the service & setup a promise function as the call is asynchronous
-[source]
+[source,javascript]
 ----
 ...
 .when('/Catalogs',
@@ -772,7 +772,7 @@ oc expose service hystrix-dashboard --port=8080
 
 . Add Spring Boot Hystrix dependency to the pom.xml of the `cdservice` (pom.xml) project in order to get the Hystrix Java classes
 +
-[source]
+[source,xml]
 ----
 <dependency>
     <groupId>org.wildfly.swarm</groupId>
@@ -782,7 +782,7 @@ oc expose service hystrix-dashboard --port=8080
 
 . Add Hystrix enabled label to the service definition (src/main/fabric8/svc.yml) as this label will be used by the Fabric Hystrix pod to collect thge info.
 +
-[source]
+[source,yaml]
 ----
 metadata:
   labels:
@@ -794,7 +794,7 @@ metadata:
 . Return a list of catalog within the `run()` method.
 . Populate a dummy record within the `fallback()` method.
 +
-[source]
+[source,java]
 ----
 touch src/main/java/org/cdservice/model/GetCatalogListCommand.java
 
@@ -842,7 +842,7 @@ EOF
 
 . Register the GetCatalogListCommand within the `src/main/java/org/cdservice/rest/CatalogEndpoint.java` class in order to access the Circuit Break or let's say to enable it.
 +
-[source]
+[source,java]
 ----
 import org.cdservice.model.GetCatalogListCommand;
 
@@ -888,7 +888,7 @@ oc port-forward $pod 3306:3306
 
 In case you want to create some new records or add yours, use this SQL query to insert CD records (if the table has been created !)
 
-[source]
+[source,sql]
 ----
 INSERT INTO Catalog (id, version, artist, description, price, publicationDate, title) VALUES (1001, 1, 'ACDC', 'Australian hard rock band', 15.0, '1980-07-25', 'Back in Black');
 INSERT INTO Catalog (id, version, artist, description, price, publicationDate, title) VALUES (1002, 1, 'Abba', 'Swedish pop music group', 12.0, '1976-10-11', 'Arrival');
