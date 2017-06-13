@@ -15,7 +15,7 @@ cd $PROJECT_DIR
 echo "##########################################"
 echo "Deploy the MySQL Server"
 echo "##########################################"
-oc new-app --template=mysql-persistent \
+oc new-app --template=mysql-ephemeral \
     -p MYSQL_USER=mysql \
     -p MYSQL_PASSWORD=mysql \
     -p MYSQL_DATABASE=catalogdb

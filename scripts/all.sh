@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 #
-# Usage
+# Usage. We assume that the project/namespace 'workshop' doesn't yet exist under your user account before to run the script
+#
 # ./scripts/all.sh (when using locally minishift and default use & password admin/admin)
 # ./scripts/all.sh -a https://console.35.187.106.198.nip.io:8443 -u admin -p password
 # ./scripts/all.sh -a https://console.35.187.106.198.nip.io:8443 -t TOKEN

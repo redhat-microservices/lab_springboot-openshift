@@ -431,7 +431,7 @@ NOTE: To use the scaffold option, pass the boolean true to the command ` ./scrip
 +
 [source]
 ----
-oc new-app --template=mysql-persistent \
+oc new-app --template=mysql-ephemeral \
     -p MYSQL_USER=mysql \
     -p MYSQL_PASSWORD=mysql \
     -p MYSQL_DATABASE=catalogdb
