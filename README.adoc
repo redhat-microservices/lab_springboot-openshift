@@ -501,15 +501,17 @@ EOF
 Remark: As you can see, the hostname defined for the connection-url corresponds to the `mysql` service published on OpenShift (`oc get svc/mysql`).
 This name will be resolved by the internal DNS server exposed by OpenShift when the application will issue a request to this machine.
 
-. Add dependency to the project to use Spring Cloud Kubernetes Core lib which allows Spring Boot to access the config map and read the application properties
-  property
+. Add dependency to the project to use Spring Cloud Kubernetes Core & config lib which allows Spring Boot to access the Kubernetes Config Map to read the application properties
+  keys
 +
 [source]
 ----
+project-add-repository --url http://repo.spring.io/libs-snapshot-local --named spring-cloud-snapshot
 project-add-dependencies org.springframework.cloud:spring-cloud-starter-kubernetes-config:0.2.0.BUILD-SNAPSHOT
 ----
 
-. Add bootstrap.properties to specify the name of the application to be used and which corresponds to the key of the ConfigMap to search
+. Add a `bootstrap.properties` to specify the name of the application to be used which corresponds to the key name of the ConfigMap to search. For our workshop,
+the key name is `cdservice`
 +
 [source]
 ----
