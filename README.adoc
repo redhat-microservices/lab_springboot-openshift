@@ -183,7 +183,7 @@ mv project workshop && cd workshop
   <packaging>pom</packaging>
   <name>project</name>
 </project>
-``
+```
 
 ### Catalog CD project
 
