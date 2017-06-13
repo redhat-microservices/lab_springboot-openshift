@@ -513,8 +513,8 @@ this machine.
 +
 [source]
 ----
-forge -e "project-add-repository --url http://repo.spring.io/libs-snapshot-local --named spring-cloud-snapshot"
-forge -e "project-add-dependencies org.springframework.cloud:spring-cloud-starter-kubernetes-config:0.2.0.BUILD-SNAPSHOT"
+project-add-repository --url http://repo.spring.io/libs-snapshot-local --named spring-cloud-snapshot
+project-add-dependencies org.springframework.cloud:spring-cloud-starter-kubernetes-config:0.2.0.BUILD-SNAPSHOT
 ----
 
 . Add a `bootstrap.properties` to specify the name of the application to be used which corresponds to the key name of the ConfigMap to search. For our workshop,
@@ -564,7 +564,7 @@ EOF
 +
 [source]
 ----
-forge -e "fabric8-setup --integration-test=false"
+fabric8-setup --integration-test=false
 ----
 
 . Deploy the `cdservice` project on OpenShift using this maven instruction
