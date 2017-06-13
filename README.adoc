@@ -392,14 +392,14 @@ to use it.
 
 [source]
 ----
- ./scripts/setup.sh <PROJECT_NAME>
+ ./scripts/create_cdstore.sh <PROJECT_NAME>
  where <PROJECT_NAME> corresponds to the name of the directory where the project will be created
 ----
 
 NOTE: If you want to create the project using another version of JBoss Forge deployed under a different path on your machine, you can pass the parameter to access the forge executable using an env var
-      `FORGE_HOME=$HOME/.forge ./scripts/setup.sh demo`
+      `FORGE_HOME=$HOME/.forge ./scripts/create_cdstore.sh demo`
 
-NOTE: To use the scaffold option, pass the boolean true to the command ` ./scripts/setup.sh demo true`
+NOTE: To use the scaffold option, pass the boolean true to the command ` ./scripts/create_cdstore.sh demo true`
 
 ## Build and deploy locally
 
