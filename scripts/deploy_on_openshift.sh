@@ -7,7 +7,7 @@
 # PATH of the PROJECT directory
 #
 
-PROJECT_DIR=${1:-demo}
+PROJECT_DIR=${1:-workshop}
 export CURRENT=$(pwd)
 
 cd $PROJECT_DIR
