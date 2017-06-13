@@ -160,8 +160,7 @@ Within the git cloned project, create a project named `workshop` using the maven
 
 . Create the parent maven project
 +
-[source]
-----
+```sh
 mvn archetype:generate -DarchetypeGroupId=org.codehaus.mojo.archetypes \
                        -DarchetypeArtifactId=pom-root \
                        -DarchetypeVersion=RELEASE \
@@ -170,7 +169,7 @@ mvn archetype:generate -DarchetypeGroupId=org.codehaus.mojo.archetypes \
                        -DartifactId=project \
                        -Dversion=1.0.0-SNAPSHOT
 mv project workshop && cd workshop
-----
+```
 
 . Verify that your pom.xml file is similar to the following file.
 +
