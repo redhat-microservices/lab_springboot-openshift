@@ -16,7 +16,7 @@ you will need to install the following on your machine:
 - [x] http://maven.apache.org/download.cgi[Maven 3.3.6 or higher]
 - [x] http://www.virtualbox.org/wiki/Downloads[Virtualbox 5.0 or higher]
 - [x] https://github.com/minishift/minishift/releases/tag/v1.1.0[Minishift v1.1.0]
-- [x] http://forge.jboss.org/download[JBoss Forge]
+- [x] http://forge.jboss.org/download[JBoss Forge 3.7 or higher]
 - [x] http://developers.redhat.com/products/devstudio/download/?referrer=jbd[JBoss Developer Studio 10 (optional)]
 - [x] http://github.com/openshift/origin/releases/tag/v1.5.0[OpenShift Client 1.5.0 (optional)]
 
@@ -108,7 +108,7 @@ using the Fabric8 maven plugin
 ----
 brew install jboss-forge
 forge -i io.fabric8.forge:devops,2.3.88
-forge -i org.jboss.forge.addon:spring-boot,1.0.0-SNAPSHOT
+forge -i org.jboss.forge.addon:spring-boot,1.0.0.Alpha4
 ----
 
 # Goals
