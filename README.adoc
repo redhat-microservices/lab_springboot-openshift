@@ -88,11 +88,10 @@ The OpenShift client tool is package within Minishift since version 1.0 and by c
 `minishift oc-env`
 
 Next, we will provide more rights for the admin `default` user in order to let it to access the different projects/namespaces to manage the resources.
-This step is only required if you use the new Minishift client (>= 1.0.0.Beta3).
 
 You can retrieve the private address of the VM using the `minishift ip` command.
 
-[source]
+[source,shell]
 ----
 oc login https://$(minishift ip):8443 -u system:admin
 oc adm policy add-cluster-role-to-user cluster-admin admin
@@ -105,7 +104,7 @@ oc project default
 In order to use JBoss Forge with this lab, 2 addons should be installed to be able to create a Spring Boot project and deploy it on the OpenShift platform
 using the Fabric8 maven plugin
 
-[source]
+[source,shell]
 ----
 brew install jboss-forge
 forge -i io.fabric8.forge:devops,2.3.88
@@ -160,7 +159,8 @@ Within the git cloned project, create a project named `workshop` using the maven
 
 . Create the parent maven project
 +
-```shell
+[source,shell]
+----
 mvn archetype:generate -DarchetypeGroupId=org.codehaus.mojo.archetypes \
                        -DarchetypeArtifactId=pom-root \
                        -DarchetypeVersion=RELEASE \
@@ -169,11 +169,12 @@ mvn archetype:generate -DarchetypeGroupId=org.codehaus.mojo.archetypes \
                        -DartifactId=project \
                        -Dversion=1.0.0-SNAPSHOT
 mv project workshop && cd workshop
-```
+----
 
 . Verify that your pom.xml file is similar to the following file.
 +
-```xml
+[source,xml]
+----
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
@@ -183,7 +184,7 @@ mv project workshop && cd workshop
   <packaging>pom</packaging>
   <name>project</name>
 </project>
-```
+----
 
 ### Catalog CD project
 
@@ -192,14 +193,15 @@ mv project workshop && cd workshop
   The following command must be executed within the Forge shell or by passing the command using this convention
   `forge -e "..."` where `...` corresponds to a Forge command.
 +
-```Emacs Lisp
+[source,shell]
+----
 project-new --named cdservice --type spring-boot
-```
+----
 
 . Setup the JPA project using a `H2` database.
 If no database type is specified then `H2` is selected by default. The JBoss Forge command will add a maven GAV H2 artifact and will fill the application.properties file with the Hibernate properties. No datasource is predefined here as we will only use H2 in memory. Note that this command should be executed within the `cdservice` folder, which should be automatically selected after creating the new project.
 +
-[source]
+[source,shell]
 ----
 jpa-setup
 ----
