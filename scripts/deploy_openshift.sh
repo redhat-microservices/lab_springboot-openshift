@@ -32,8 +32,12 @@ echo "Create missing files, deps (bootstrap.properties/service & route)"
 echo "##########################################"
 cd cdservice
 
+mkdir -p src/main/config-local
 mkdir -p src/main/config-openshift
 cp ../../scripts/service/data-mysql.sql src/main/config-openshift/data.sql
+cp src/main/resources/application.properties src/main/config-local
+
+forge -e "project-remove-dependencies com.h2database:h2:"
 
 touch src/main/config-openshift/bootstrap.properties
 cat << 'EOF' > src/main/config-openshift/bootstrap.properties
@@ -43,7 +47,6 @@ EOF
 mkdir -p src/main/fabric8
 touch src/main/fabric8/configmap.yml
 
-forge -e "project-remove-dependencies com.h2database:h2:"
 forge -e "project-add-dependencies org.springframework.cloud:spring-cloud-starter-kubernetes-config:0.2.0.BUILD-SNAPSHOT"
 
 cat << 'EOF' > src/main/fabric8/configmap.yml
@@ -80,6 +83,25 @@ spec:
 EOF
 
 xml="<profiles>\
+    <profile>\
+      <id>local</id>\
+      <dependencies>\
+        <dependency>\
+          <groupId>com.h2database</groupId>\
+          <artifactId>h2</artifactId>\
+        </dependency>\
+      </dependencies>\
+      <build>\
+        <resources>\
+          <resource>\
+            <directory>src/main/config-local</directory>\
+          </resource>\
+          <resource>\
+            <directory>src/main/resources</directory>\
+          </resource>\
+        </resources>\
+      </build>\
+    </profile>\
     <profile>\
       <id>openshift</id>\
       <dependencies>\
