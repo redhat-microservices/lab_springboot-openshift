@@ -173,8 +173,7 @@ mv project workshop && cd workshop
 
 . Verify that your pom.xml file is similar to the following file.
 +
-[source]
-----
+```xml
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
@@ -184,7 +183,7 @@ mv project workshop && cd workshop
   <packaging>pom</packaging>
   <name>project</name>
 </project>
-----
+``
 
 ### Catalog CD project
 
@@ -193,10 +192,9 @@ mv project workshop && cd workshop
   The following command must be executed within the Forge shell or by passing the command using this convention
   `forge -e "..."` where `...` corresponds to a Forge command.
 +
-[source]
-----
+```sh
 project-new --named cdservice --type spring-boot
-----
+```
 
 . Setup the JPA project using a `H2` database.
 If no database type is specified then `H2` is selected by default. The JBoss Forge command will add a maven GAV H2 artifact and will fill the application.properties file with the Hibernate properties. No datasource is predefined here as we will only use H2 in memory. Note that this command should be executed within the `cdservice` folder, which should be automatically selected after creating the new project.
