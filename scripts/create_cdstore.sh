@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 
 #
-# Usage: ./scripts/setup.sh <PROJECT_DIR> <SCAFFOLD_BOOLEAN>
+# Usage: ./scripts/create_cdstore.sh <PROJECT_DIR> <SCAFFOLD_BOOLEAN>
 # E.g.
 # To scaffold, simply add the true boolean
-# ./scripts/setup.sh demo true
+# ./scripts/create_cdstore.sh demo true
 #
 # By default, nos scaffolding will take place
-# ./scripts/setup.sh demo
+# ./scripts/create_cdstore.sh demo
 #
 # You can also use another JBoss Forge path
-# FORGE_HOME=$HOME/.forge ./scripts/setup.sh demo
+# FORGE_HOME=$HOME/.forge ./scripts/create_cdstore.sh demo
 #
 
 PROJECT_DIR=${1:-demo}
