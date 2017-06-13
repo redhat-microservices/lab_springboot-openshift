@@ -3,8 +3,6 @@
 :toclevels: 2
 :toc-title: Table of Content
 :numbered:
-:source-highlighter: pygments
-:pygments-style: emacs
 
 = Hands On Lab with Spring Boot & OpenShift
 
