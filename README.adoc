@@ -3,8 +3,6 @@
 :toclevels: 2
 :toc-title: Table of Content
 :numbered:
-:source-highlighter: pygments
-:pygments-style: emacs
 
 = Hands On Lab with Spring Boot & OpenShift
 
@@ -380,7 +378,7 @@ cp -r ../scripts/front/modified/ cdfront/src/main/resources/static/
 . Change the address of the `cdservice` http server that the front will access.
   Edit the file `src/main/resources/static/service.json` and add modify the var resource
 +
-[source]
+[source,json]
 ----
 { "cd-service": "http://localhost:8080/rest/catalogs/" }
 ----
@@ -587,7 +585,7 @@ As the URL to access the service is specified within the `service.json`, we will
 . Edit the `service.json` file under `cdfront/src/main/resources/static` folder & modify the following key where the HOST address corresponds to the IP address used
   by your VM machine
 +
-[source]
+[source,json]
 ----
 { "cd-service": "http://cdservice-workshop.MY_HOST_IP_ADDRESS.nip.io/rest/catalogs/" }
 ----
@@ -598,7 +596,7 @@ As the URL to access the service is specified within the `service.json`, we will
   one to configure the service exposed by the Kubernetes Api (gateway) and the other to configure the HA Proxy how to access the service from the host machine
 . Add a `svc.yml` under the `src/main/fabric8` folder where the target port is 8081 in order to create a service.
 +
-[source]
+[source,yaml]
 ----
 mkdir -p src/main/fabric8/
 touch src/main/fabric8/svc.yml
