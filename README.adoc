@@ -262,7 +262,7 @@ cp src/main/resources/application.properties src/main/config-local
   when the project will be compiled. Move also the h2 database maven dependency within the profile. This dependency will be detected by Spring Boot when the server will be started
   and by consequence this H2 JDBC Driver will be used.
 +
-[source]
+[source,xml]
 ----
 <profile>
   <id>local</id>
@@ -307,7 +307,7 @@ mv src/main/resources/application.properties src/main/config-openshift
 
 . Create another profile called `openshift`
 +
-[source]
+[source,xml]
 ----
 <profile>
   <id>openshift</id>
@@ -326,7 +326,7 @@ mv src/main/resources/application.properties src/main/config-openshift
 
 . Move the `MySQL Maven dependency` from the pom.xml within the `openshift` profile as the MySQL database will only be used when the project will be deployed on OpenShift.
 +
-[source]
+[source,xml]
 ----
 ...
 <profile>
