@@ -46,16 +46,25 @@ else
    oc login $api -u $user -p $password
 fi
 
-echo "##########################################"
-echo "## Log on to openshift - minishift, create workshop project/namespace and assign role view"
-echo "##########################################"
-oc login https://$(minishift ip):8443 -u admin -p admin
+echo "##########################################################################"
+echo "## Create workshop project and add role view to th serviceacount default. "
+echo "##########################################################################"
 oc new-project workshop
 oc policy add-role-to-user view -n $(oc project -q) -z default
 
+echo "##########################################################################"
+echo "#### Call script to create cdservice & cdfront for local usage            "
+echo "##########################################################################"
 ./scripts/create_cdstore.sh demo
+
+echo "##########################################################################"
+echo "#### Call script to refactor projct and deploy it on Openshift            "
+echo "##########################################################################"
 ./scripts/deploy_on_openshift.sh
 
+echo "##########################################################################"
+echo "#### Wait till we get a response from the service                         "
+echo "##########################################################################"
 export APP=$(oc get route cdservice -o json | jq '.spec.host' | tr -d \"\")
 while [ $(curl --write-out %{http_code} --silent --output /dev/null $APP/rest/catalogs) != 200 ]
    do
