@@ -522,7 +522,8 @@ spring.application.name=cdservice
 EOF
 ----
 
-. Add the role `view` to the user `serviceaccount` to let the Spring Cloud Kubernetes API to access the ConfigMap exposed by the Kuberntes Api
+. Add the role `view` to the default `serviceaccount` to let the Spring Cloud Kubernetes API to access the ConfigMap exposed by the Kubernetes Api. This serviceaccount
+is the pod's user that the application will use to access the Kubernetes backend.
 +
 [source]
 ----
