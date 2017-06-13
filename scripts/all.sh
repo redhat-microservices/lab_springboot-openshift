@@ -41,8 +41,8 @@ fi
 
 oc delete project/workshop
 
-#./scripts/create_cdstore.sh demo
-#./scripts/deploy_on_openshift.sh
+./scripts/create_cdstore.sh demo
+./scripts/deploy_on_openshift.sh
 
 export APP=$(oc get route cdservice -o json | jq '.spec.host' | tr -d \"\")
 while [ $(curl --write-out %{http_code} --silent --output /dev/null $APP/rest/catalogs) != 200 ]
