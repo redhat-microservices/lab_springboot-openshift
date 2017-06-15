@@ -751,12 +751,13 @@ angular.module('cdservice').factory('CatalogResource', function ($resource, conf
 
 ## Enable circuit breaker
 
-Within this section, we will implement the circuit breaker pattern using the NetFlix OSS Hystrix project. The breaker will be developed within
+Within this section, we will implement the circuit breaker pattern using the https://github.com/Netflix/Hystrix[NetFlix OSS Hystrix] project. The breaker will be developed within
 our `CatalogEndpoint` in order to send a dummy record to the front if the database is not longer available. We will extend the `cdservice` project
-to support this pattern by adding first an HystrixCommand and next to register it within the Endpoint class. The command contains 2 methods `run()` and `fallback()`
-which are used by the HystrixServlet with the help of the Java observable pattern. The method run will be called regularly to check if we get a response from the MySQL database,
-if this is the case, the fallback method will be called. The information (= events or hearbeat messages) created, are published by Hystrix within a server called
-Turbine where the role is to collect but also to aggregate the information. It also allows to graphically display what happen within the different circuit breakers deployed.
+to support this pattern by adding first an `HystrixCommand` and next to register it within the Endpoint class.
+
+The command contains 2 methods `run()` and `fallback()` which are used by the `HystrixServlet` with the help of the Java observable pattern. The method run will be called regularly to check if we get a response from the MySQL database,
+if this is the case, the fallback method will be called. The information (= events or hearbeat messages) created, are published by Hystrix regularly on the
+`Turbine` which will aggregate the information/events. It also allows to graphically display what happen within the different circuit breakers deployed (open/close status).
 
 . Setup a Turbine server which is responsible to collect the events pushed by the Hystrix Commands
 +
