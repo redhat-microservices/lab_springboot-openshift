@@ -751,12 +751,14 @@ angular.module('cdservice').factory('CatalogResource', function ($resource, conf
 
 ## Enable circuit breaker
 
-Within this section, we will implement the circuit breaker pattern using the https://github.com/Netflix/Hystrix[NetFlix OSS Hystrix] project. The breaker will be developed within
+Within this section, we will implement the circuit breaker pattern using https://github.com/Netflix/Hystrix[NetFlix Hystrix] project. The breaker will be developed within
 our `CatalogEndpoint` in order to send a dummy record to the front if the database is not longer available. We will extend the `cdservice` project
 to support this pattern by adding first an `HystrixCommand` and next to register it within the Endpoint class.
 
-The command contains 2 methods `run()` and `fallback()` which are used by the `HystrixServlet` with the help of the Java observable pattern. The method run will be called regularly to check if we get a response from the MySQL database,
-if this is the case, the fallback method will be called. The information (= events or hearbeat messages) created, are published by Hystrix regularly on the
+The command contains 2 methods `run()` and `fallback()` which are used by the `HystrixServlet` with the help of a Java observable pattern. The method run will be called regularly to check if we get a response from the MySQL database,
+if this is the case, the fallback method will be called.
+
+The information (= events or hearbeat messages) created, are published by Hystrix regularly on the
 `Turbine` which will aggregate the information/events. It also allows to graphically display what happen within the different circuit breakers deployed (open/close status).
 
 . Setup a Turbine server which is responsible to collect the events pushed by the Hystrix Commands
@@ -768,7 +770,7 @@ oc policy add-role-to-user admin system:serviceaccount:workshop:turbine
 oc expose service turbine-server
 ----
 
-. Then deply a Hystrix Web dashboard from where we can consult the events published by the Turbine server and check if some strange happened.
+. Then deploy a `Hystrix` Web dashboard from where we can consult the status of the circuit breakers.
 +
 [source]
 ----
@@ -776,26 +778,39 @@ oc create -f http://repo1.maven.org/maven2/io/fabric8/kubeflix/hystrix-dashboard
 oc expose service hystrix-dashboard --port=8080
 ----
 
-. Add Spring Boot Hystrix dependency to the pom.xml of the `cdservice` (pom.xml) project in order to get the Hystrix Java classes
+. Add the `Spring Boot Hystrix starter` to the pom.xml of the `cdservice` (pom.xml) project in order to use the Hystrix Java classes.
+  Execute this JBoss Forge command within the `cdservice` project
 +
-[source,xml]
+[source]
 ----
-<dependency>
-    <groupId>org.wildfly.swarm</groupId>
-    <artifactId>hystrix</artifactId>
-</dependency>
+project-add-dependencies org.springframework.cloud:spring-cloud-starter-hystrix:1.2.7.RELEASE
 ----
 
-. Add Hystrix enabled label to the service definition (src/main/fabric8/svc.yml) as this label will be used by the Fabric Hystrix pod to collect thge info.
+. Add the `hystrix.enabled` label to the service definition (src/main/fabric8/svc.yml) as this label will be used by the Fabric Hystrix pod to collect the info
+  which are the events required to be send to the Turbine server to provide the status of the Circuit Breaker
 +
 [source,yaml]
 ----
+touch src/main/fabric8/svc.yml
+
+cat << 'EOF' > src/main/fabric8/svc.yml
+apiVersion: v1
+kind: Service
 metadata:
+  name: ${project.artifactId}
   labels:
     hystrix.enabled: true
+
+spec:
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
+EOF
 ----
 
-. Create a Hystrix command class by extending the `HystrixCommand` classto where you will define the run and fallback methods.
+. Create a `Hystrix` command class where you will define the run and fallback methods of the Circuit Breaker.
 . Register the command under the Group Key `CatalogGroup`
 . Return a list of catalog within the `run()` method.
 . Populate a dummy record within the `fallback()` method.
@@ -846,7 +861,7 @@ public class GetCatalogListCommand extends HystrixCommand<List> {
 EOF
 ----
 
-. Register the GetCatalogListCommand within the `src/main/java/org/cdservice/rest/CatalogEndpoint.java` class in order to access the Circuit Break or let's say to enable it.
+. Register the `GetCatalogListCommand` within the `src/main/java/org/cdservice/rest/CatalogEndpoint.java` class in order to use the Circuit Break.
 +
 [source,java]
 ----
@@ -867,7 +882,11 @@ public List<Catalog> listAll(@QueryParam("start") Integer startPosition,
 mvn clean fabric8:deploy -Popenshift
 ----
 
-. Scale down the database, to see circuit breaker fallback.
+. Open the Hystric dashboard to view the status of the circuit breaker. It should be `close`
++
+NOTe: Get the address of the dashboard using the command `oc get route/ --template='{{.spec.host}}'`
+
+. Scale down the database.
 +
 [source]
 ----
@@ -876,7 +895,9 @@ oc scale --replicas=0 dc mysql
 
 . Refresh the CD Front and click on the `catalog` button. A record will be displayed with the info `This is a fallback record`
 
-You can read more about Hystrix https://github.com/Netflix/Hystrix/wiki/How-it-Works[here].
+. Go back to the Hystrix dashboard to verify that the ctstaus of the circuit breaker is `open` now.
+
+INFO: You can read more about Hystrix https://github.com/Netflix/Hystrix/wiki/How-it-Works[here].
 
 ## Tricks
 
