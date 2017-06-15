@@ -6,6 +6,7 @@
 # ./scripts/all.sh (when using locally minishift and default user & password admin/admin, directory name is workshop)
 # ./scripts/all.sh -a https://console.35.187.106.198.nip.io:8443 -u admin -p password
 # ./scripts/all.sh -a https://console.35.187.106.198.nip.io:8443 -t TOKEN
+# ./scripts/all.sh -a https://console.35.187.106.198.nip.io:8443 -t TOKEN -d /tmp/demo
 #
 
 while getopts a::u::p::t::d:: option
