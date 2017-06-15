@@ -90,9 +90,9 @@ Starting local OpenShift cluster using 'virtualbox' hypervisor...
 The OpenShift client is packaged within the Minishift distribution since the version 1.1.0. So, execute this `minishift oc-env` to display the command you need to type into your shell in order to add the `oc` binary to your `PATH`. The output of oc-env will differ depending on OS and shell type.
 
 Now you should be able to log on to your Openshift platform usign the command
-+
+
 ----
-oc login $(minishift console --url) -u admin -p admin
+oc login $(minishift ip) -u admin -p admin
 oc login https://HOSTNAME_OR_IP_ADDRESS:8443  -u admin -p admin
 ----
 
@@ -102,7 +102,7 @@ You can retrieve the private address of the VM using the `minishift ip` command.
 
 [source,shell]
 ----
-oc login https://$(minishift ip):8443 -u system:admin
+oc login https://HOSTNAME_OR_IP_ADDRESS:8443 -u system:admin
 oc adm policy add-cluster-role-to-user cluster-admin admin
 oc login -u admin -p admin
 oc project default
@@ -123,17 +123,24 @@ forge -i org.jboss.forge.addon:spring-boot,1.0.0.Alpha4
 
 The goal of this lab is to :
 
-- Create a Microservices Java application that we will deploy within a virtualized environment managed by OpenShift,
-- Externalize the configuration using https://kubernetes.io/docs/user-guide/configmap/[Kubernetes Config Map],
-- Package/Deploy the project in OpenShift,
-- Simplify the development of the application using JBoss Forge technology
-- Implements the circuit broker pattern
+- Create a Microservices project composed of an AngularJS Web Front end, a backend application connected to a MySQL database,
+- Use Spring Boot technology to design/run the Static Web application and the Java JPA backend,
+- Simplify the development of the application, your devtools experience using JBoss Forge,
+- Implements the circuit broker pattern,
+- Package/Deploy the project on OpenShift,
+- Run the Microservices a docker container within the Kubernetes/OpenShift platform,
+- Externalize the configuration using https://kubernetes.io/docs/user-guide/configmap/[Kubernetes Config Map]
 
-The project will contain 3 modules; a web static Front end, a backend service exposed by the Spring Boot Java Container & a MySQL database.
-The JPA layer is managed by Hibernate and with the help of Spring ORM. The front end is a AngularJS application.
+The project will contain 3 modules; a web static Front end, a backend service exposed by the Spring Boot Java Container and a MySQL database.
+
+The JPA layer is managed by Hibernate and with the help of Spring ORM.
+
+The front end is a AngularJS application.
 
 Each module will be packaged and deployed as a Docker image on OpenShift. The OpenShift Source to Image Tool (= https://docs.openshift.com/enterprise/3.2/creating_images/s2i.html[S2I]) will be used for that purpose.
+
 It will use the Java S2I Docker image responsible to build the final Docker image of your project using the source code of the maven module uploaded to the openshift platform.
+
 This step will be performed using the https://maven.fabric8.io/[Fabric8 Maven Plugin]. This Maven plugin is a Java Kubernetes/OpenShift client able to communicate with the OpenShift platform using the REST endpoints
 in order to issue the commands allowing to build aproject, deploy it and finally launch a docker process as a pod.
 
