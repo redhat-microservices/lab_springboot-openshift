@@ -37,6 +37,9 @@ if [ -z "$directory" ];then
   directory="workshop"
 fi
 
+# Set env var with the location of the scripts dir
+export SCRIPTS_DIR=$(pwd)/scripts
+
 echo "############################"
 echo "API : $api"
 echo "User : $user"

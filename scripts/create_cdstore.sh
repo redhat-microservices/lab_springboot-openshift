@@ -17,6 +17,11 @@ PROJECT_DIR=${1:-demo}
 SCAFFOLD=${2:-false}
 export CURRENT=$(pwd)
 
+# If no env var has been set for the scripts dir
+if [ -z "$SCRIPTS_DIR" ]; then
+  SCRIPTS_DIR=$(pwd)/scripts
+fi  
+
 if [ -d $PROJECT_DIR ]; then
  echo "## Deleting $PROJECT_DIR directory ...."
  rm -rf $PROJECT_DIR
@@ -28,28 +33,34 @@ echo "##############################################"
 mvn archetype:generate -DarchetypeGroupId=org.codehaus.mojo.archetypes -DarchetypeArtifactId=pom-root -DarchetypeVersion=RELEASE -DinteractiveMode=false -DgroupId=org.cdstore -DartifactId=project -Dversion=1.0.0-SNAPSHOT
 mv project $PROJECT_DIR && cd $PROJECT_DIR
 
+pushd $PROJECT_DIR
+
 if [ $SCAFFOLD = true ]; then
     echo "##############################################"
     echo "## Run Forge commands to create the project & Scaffold"
     echo "##############################################"
-    forge -e "run ../scripts/create-cdstore-scaffold.fsh"
+    forge -e "run $SCRIPTS_DIR/create-cdstore-scaffold.fsh"
   else
     echo "##############################################"
     echo "## Run Forge commands to create the project   "
     echo "##############################################"
-    forge -e "run ../scripts/create-cdstore.fsh"
+    forge -e "run $SCRIPTS_DIR/create-cdstore.fsh"
 fi
+
+popd
 
 echo "##############################################"
 echo "## Copy static content & SQL data for h2      "
 echo "##############################################"
-cp -r ../scripts/service/data-h2.sql cdservice/src/main/resources/data.sql
+cp -r $SCRIPTS_DIR/service/data-h2.sql cdservice/src/main/resources/data.sql
 
 if [ $SCAFFOLD = true ]; then
    mv cdservice/src/main/webapp/* cdfront/src/main/resources/static/
  else
-   cp -r ../scripts/front/modified/ cdfront/src/main/resources/static/
+   cp -r $SCRIPTS_DIR/front/modified/ cdfront/src/main/resources/static/
 fi
+
+pushd $PROJECT_DIR
 
 echo "####################################################"
 echo "## Compile project to check if everything works  !!!"
@@ -59,7 +70,9 @@ mvn clean install
 echo "####################################################"
 echo "## Enable F-m-p  #"
 echo "####################################################"
-forge -e "run ../scripts/enable-fabric8.fsh"
+forge -e "run $SCRIPTS_DIR/enable-fabric8.fsh"
+
+popd
 
 cd $CURRENT
 
