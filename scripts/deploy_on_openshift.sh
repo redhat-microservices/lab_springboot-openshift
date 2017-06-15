@@ -28,7 +28,7 @@ cd cdservice
 
 mkdir -p src/main/config-local
 mkdir -p src/main/config-openshift
-cp ../../scripts/service/data-mysql.sql src/main/config-openshift/data.sql
+cp $SCRIPTS_DIR/service/data-mysql.sql src/main/config-openshift/data.sql
 mv src/main/resources/application.properties src/main/config-local
 mv src/main/resources/data.sql src/main/config-local
 
