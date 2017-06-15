@@ -135,8 +135,7 @@ The project will contain 3 modules; a web static Front end, a backend service ex
 
 image::application.png[width="80%"]
 
-Each module will be packaged and deployed as a Docker image on OpenShift. The OpenShift Source to Image Tool (= https://docs.openshift.com/enterprise/3.2/creating_images/s2i.html[S2I]) will be used for that purpose.
-
+Each module will be deployed as a Docker image on OpenShift. The OpenShift Source to Image Tool (= https://docs.openshift.com/enterprise/3.2/creating_images/s2i.html[S2I]) will be used for that purpose.
 It will use the Java S2I Docker image responsible to build the final Docker image of your project using the source code of the maven module uploaded to the openshift platform.
 
 This step will be performed using the https://maven.fabric8.io/[Fabric8 Maven Plugin]. This Maven plugin is a Java Kubernetes/OpenShift client able to communicate with the OpenShift platform using the REST endpoints
@@ -399,7 +398,7 @@ cp -r ../scripts/front/modified/ cdfront/src/main/resources/static/
 
 ## All in one
 
-The following script (if you want) can help you to setup partially the  project in one step. We invite you to first look to the decomposed steps in order to build the project step-by-step before
+The following script (if you want) can help you to setup partially the project in one step. We invite you to first look to the decomposed steps in order to build the project step-by-step before
 to use it.
 
 [source]
@@ -430,8 +429,8 @@ NOTE: To use the scaffold option, pass the boolean true to the command ` ./scrip
 
 ### Setup MySQL Database
 
-. TODO : Add step to log on OpenShift locally or using GCP instance
-. Verify first that you are well connected to the `OpenShift` platform by issuing `oc` commands within a terminal
+. Log on to OpenShift if you haven't done yet before using the command `oc login`
+. Verify first that you are well connected to the `OpenShift` platform by issuing some `oc` commands within a terminal as
 
   oc status
 
@@ -439,7 +438,7 @@ NOTE: To use the scaffold option, pass the boolean true to the command ` ./scrip
 
   oc new-project workshop
 
-. Create the MySQL application using the OpenShift MySQL Template
+. Create the MySQL application using the OpenShift MySQL Ephemeral Template
 +
 [source]
 ----
@@ -449,7 +448,7 @@ oc new-app --template=mysql-ephemeral \
     -p MYSQL_DATABASE=catalogdb
 ----
 
-. Next, check if the Database is up and alive and connect to the pod to execute some SQL commands
+. Next, check if the Database is up and alive and connect to the pod to execute SQL commands
 +
 [source]
 ----
@@ -465,9 +464,9 @@ mysql> SELECT t.* FROM catalogdb.Catalog t;
 ERROR 1146 (42S02): Table 'catalogdb.Catalog' doesn't exist
 ----
 
-As we haven't yet deployed the service, the Catalog DB hasn't been yet created by the Hibernate framework so this
-message is expected. Note also that there shouldn't be any spaces between the `-p` option and the password you
-provide to the `mysql` command as otherwise, this will fail.
+NOTE: As we haven't yet deployed the service, the Catalog DB hasn't been yet created by the Hibernate framework so this
+      message is expected.
+      Note also that there shouldn't be any spaces between the `-p` option and the password you provide to the `mysql` command as otherwise, this will fail.
 
 ### Externalize the Datasource
 
