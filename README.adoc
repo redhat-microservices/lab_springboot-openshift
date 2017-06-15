@@ -514,7 +514,7 @@ data:
 EOF
 ----
 
-Remark: As you can see, the hostname defined for the connection-url corresponds to the `mysql` service published on OpenShift (`oc get svc/mysql`).
+NOTE: As you can see, the hostname defined for the connection-url corresponds to the `mysql` service published on OpenShift (`oc get svc/mysql`).
 This name will be resolved by the internal DNS server exposed by OpenShift when the application issues a request to
 this machine.
 
