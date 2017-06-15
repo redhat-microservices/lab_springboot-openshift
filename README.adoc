@@ -783,6 +783,8 @@ oc expose service hystrix-dashboard --port=8080
 +
 [source]
 ----
+project-add-dependencies org.springframework.boot:spring-boot-starter-actuator:
+project-add-dependencies org.springframework.cloud:spring-cloud-starter-kubernetes-netflix:0.2.0.BUILD-SNAPSHOT
 project-add-dependencies org.springframework.cloud:spring-cloud-starter-hystrix:1.2.7.RELEASE
 ----
 
@@ -800,7 +802,6 @@ metadata:
   name: ${project.artifactId}
   labels:
     hystrix.enabled: true
-
 spec:
   ports:
     - protocol: TCP
@@ -875,6 +876,16 @@ public List<Catalog> listAll(@QueryParam("start") Integer startPosition,
 }
 ----
 
+. Modify the `DemoApplication` class to add the `@EnableCircuitBreaker` annotation to let Spring to register the Circuit Breaker with Hystrix when it will be started
++
+----
+import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
+
+@SpringBootApplication
+@EnableCircuitBreaker
+public class DemoApplication {
+----
+
 . Compile the `cdservice` and redeploy the modified `cdservice` pod on OpenShift.
 +
 [source]
@@ -882,7 +893,7 @@ public List<Catalog> listAll(@QueryParam("start") Integer startPosition,
 mvn clean compile fabric8:deploy -Popenshift -DskipTests=true
 ----
 
-. Open the Hystric dashboard to view the status of the circuit breaker. It should be `close`
+. Open the Hystrix dashboard to view the status of the circuit breaker. It should be `close`
 +
 NOTe: Get the address of the dashboard using the command `oc get route/ --template='{{.spec.host}}'`
 
@@ -895,7 +906,7 @@ oc scale --replicas=0 dc mysql
 
 . Refresh the CD Front and click on the `catalog` button. A record will be displayed with the info `This is a fallback record`
 
-. Go back to the `Hystrix dashboard` to verify that the ctstaus of the circuit breaker is `open` now.
+. Go back to the `Hystrix dashboard` to verify that the status of the circuit breaker is `open` now.
 
 INFO: You can read more about Hystrix https://github.com/Netflix/Hystrix/wiki/How-it-Works[here].
 
