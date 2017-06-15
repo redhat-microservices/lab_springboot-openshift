@@ -10,7 +10,7 @@ toc::[]
 
 # Prerequisites
 
-you will need to install the following on your machine:
+You will need to install the following on your machine:
 
 - [x] http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html[JDK 1.8]
 - [x] http://maven.apache.org/download.cgi[Maven 3.3.6 or higher]
@@ -20,11 +20,14 @@ you will need to install the following on your machine:
 - [x] http://developers.redhat.com/products/devstudio/download/?referrer=jbd[JBoss Developer Studio 10 (optional)]
 - [x] http://github.com/openshift/origin/releases/tag/v1.5.0[OpenShift Client 1.5.0 (optional)]
 
+NOTE: If you don't have enough memory on your machine to launch a Hypervisor with Minishift, then ask to the instructor to have access to
+an Openshift platform running in the cloud.
+
 # Installation of OpenShift
 
-In order to use OpenShift platform on your laptop, we will use the Minishift Go clientApplication which has been created from the Minikube project of Kubernetes. It extends the features proposed by the Kubernetes client to package/deploy
-OpenShift within a VM machine. Different hypervisors are supported as Virtualbox, xhyve & VMWare. You can find more information about Minishift like also how to install it from the project:
-https://github.com/minishift/minishift
+In order to use OpenShift platform on your laptop, we will use the Minishift Golang Application which has been created from the Minikube project of Kubernetes. It extends the features proposed by the Kubernetes client to package/deploy
+OpenShift within a Linux Virtual Machine. Different hypervisors are supported as Virtualbox, Xhyve & VMWare. You can find more information about Minishift like also how to install it from the project:
+https://docs.openshift.org/latest/minishift/getting-started/installing.html
 
 To create the Virtual Machine, open a Terminal and execute this command to create it using VirtualBox as Hypervisor. The memory allocated to the instance and required is `3Gb`
 
@@ -84,8 +87,7 @@ Starting local OpenShift cluster using 'virtualbox' hypervisor...
        oc login -u system:admin
 ----
 
-The OpenShift client tool is package within Minishift since version 1.0 and by consequence, you can use this command in order to add it to the path of your shell
-`minishift oc-env`
+The OpenShift client tool is packaged within the Minishift distribution (since version 1.0). So, use the command `minishift oc-env` to display the command you need to type into your shell in order to add the `oc` binary to your `PATH`. The output of oc-env will differ depending on OS and shell type.
 
 Next, we will provide more rights for the admin `default` user in order to let it to access the different projects/namespaces to manage the resources.
 
@@ -101,8 +103,7 @@ oc project default
 
 # Configuration of JBoss Forge tool
 
-In order to use JBoss Forge with this lab, 2 addons should be installed to be able to create a Spring Boot project and deploy it on the OpenShift platform
-using the Fabric8 maven plugin
+In order to use JBoss Forge with this lab, 2 addons should be installed to create a `Spring Boot` project, generate the code and deploy it on the OpenShift platform using the Fabric8 maven plugin.
 
 [source,shell]
 ----
