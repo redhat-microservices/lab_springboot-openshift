@@ -829,6 +829,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import java.util.Collections;
 import java.util.List;
+import org.cdservice.model.Catalog;
 
 public class GetCatalogListCommand extends HystrixCommand<List> {
     private final EntityManager em;
@@ -855,7 +856,7 @@ public class GetCatalogListCommand extends HystrixCommand<List> {
     public List<Catalog> getFallback() {
         Catalog catalog = new Catalog();
         catalog.setArtist("Fallback");
-        catalog.setTitle("This is a circuit breaker");
+        catalog.setTitle("Circuit breaker is open as the DB is down !");
         return Collections.singletonList(catalog);
     }
 }
