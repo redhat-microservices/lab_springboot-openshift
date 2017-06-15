@@ -548,7 +548,7 @@ oc policy add-role-to-user view -n $(oc project -q) -z default
 ----
 
 . In order to access our cdservice outside of the pod/docker container, from the host, we will use the HAProxy deployed by OpenShift to route the traffic from the host the the VM.
-  Create a `route.yml` file under the `src/main/fabric8` to tell to OpenShift to create a route and specifies the target port which is `8080`
+  Create a `route.yml` yaml file under the directory `src/main/fabric8`. This file will be used by the Fabric8 Maven Plugin to create on OpenShift a route using target port which is `8080`
 +
 [source,yaml]
 ----
@@ -568,7 +568,7 @@ spec:
 EOF
 ----
 
-. Add the Fabric8 Maven Plugin in order to package/deploy the application on Openshift.
+. Add the Fabric8 Maven Plugin to the pom.xml file in order to package/deploy the application on OpenShift.
   Issue this JBoss Forge command.
 +
 [source]
@@ -587,22 +587,20 @@ mvn clean fabric8:deploy -Popenshift -DskipTests=true
 
   curl http://cdservice-workshop.192.168.99.100.xip.io/rest/catalogs
 
-Remark : you can retrieve the route address to access your service using this oc client command `oc get route/cdservice`
+NOTE: You can retrieve the route ADDRESS to access your service using this command `oc get route/cdservice` or even better `oc get route cdservice --template='{{.spec.host}}'
 
 ### Modify the Front to access the backend service
 
-As we have deployed the `cdservice`, we can know check what we should to allow the `cdfront` application to access the backend.
-As the URL to access the service is specified within the `service.json`, we will change the value of the key to use the route of the service.
+As we have deployed the `cdservice`, we can know check what we should do to allow the `cdfront` application to access the backend.
+As the URL to access the service is specified within a `service.json` file, we will change the value of the key to use the URL of the service to access it.
 
-. Edit the `service.json` file under `cdfront/src/main/resources/static` folder & modify the following key where the HOST address corresponds to the IP address used
-  by your VM machine
+. Edit the `service.json` file under `cdfront/src/main/resources/static` folder & modify the `cd-service` key to use the ADDRESS of the `cdservice`.
+  Append `/rest/catalogs` to the ADDRESS.
 +
 [source,json]
 ----
-{ "cd-service": "http://cdservice-workshop.MY_HOST_IP_ADDRESS.nip.io/rest/catalogs/" }
+{ "cd-service": "http://ADDRESS/rest/catalogs/" }
 ----
-
-. Change the `MY_HOST_IP_ADDRESS` key with the value of the private IP address of your virtual machine
 
 . As we will deploy the CD Front project as a Service that we will route externally from the host machine, we will create 2 OpenShift resources;
   one to configure the service exposed by the Kubernetes Api (gateway) and the other to configure the HA Proxy how to access the service from the host machine
@@ -627,7 +625,7 @@ spec:
 EOF
 ----
 
-. Create a `route.yml` file under the `src/main/fabric8` to tell to OpenShift to create a route
+. Create a `route.yml` file under the `src/main/fabric8` to tell to OpenShift to create a route from the Service which exposed our endpoint
 +
 [source,yaml]
 ----
@@ -647,7 +645,7 @@ spec:
 EOF
 ----
 
-. Add the Fabric8 Maven Plugin in order to package/deploy the application on Openshift.
+. Add the Fabric8 Maven Plugin in order to package/deploy the application on OpenShift.
   Issue this JBoss Forge command.
 +
 [source]
@@ -662,13 +660,8 @@ fabric8-setup --integration-test=false
 mvn fabric8:deploy
 ----
 
-. Check that you can access the HTML page of the Front. Remark : you can get the route address using the command `oc
-get route/cdfront`
-
-  http://cdfront-workshop.MY_HOST_IP_ADDRESS.nip.io/
-
-. Change the `MY_HOST_IP_ADDRESS` key with the value of the private IP address of your virtual machine (`minishift ip`)
-. Open your browser and verifies that you can access the Front and consult the CDs collection.
+. Retrieve the address of the `cdfront` using the command `oc get route/cdfront --template='{{.spec.host}}'`
+. Open your browser and access the front at the address `http://cdfront-workshop.HOSTNAME_OR_IPADDRESS.nip.io/`.
 
 ### Generate AngularJS Front (optional)
 
@@ -759,7 +752,7 @@ angular.module('cdservice').factory('CatalogResource', function ($resource, conf
 ## Enable circuit breaker
 
 Within this section, we will implement the circuit breaker pattern using the NetFlix OSS Hystrix project. The breaker will be developed within
-our CatalogEndpoint in order to send a dummy record to the front if the database is not longer available. We will extend the `cdservice` project
+our `CatalogEndpoint` in order to send a dummy record to the front if the database is not longer available. We will extend the `cdservice` project
 to support this pattern by adding first an HystrixCommand and next to register it within the Endpoint class. The command contains 2 methods `run()` and `fallback()`
 which are used by the HystrixServlet with the help of the Java observable pattern. The method run will be called regularly to check if we get a response from the MySQL database,
 if this is the case, the fallback method will be called. The information (= events or hearbeat messages) created, are published by Hystrix within a server called
