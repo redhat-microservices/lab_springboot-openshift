@@ -96,9 +96,9 @@ oc login $(minishift ip) -u admin -p admin
 oc login https://HOSTNAME_OR_IP_ADDRESS:8443  -u admin -p admin
 ----
 
-Next, we will provide more rights for the admin `default` user in order to let it to access the different projects/namespaces to manage the resources.
+NOTE: You can retrieve the IP address of the VM where OpenShift is running using the `minishift ip` command.
 
-You can retrieve the private address of the VM using the `minishift ip` command.
+Next, we will provide more rights for the admin `default` user in order to let it to access the different projects/namespaces to manage the resources.
 
 [source,shell]
 ----
@@ -131,11 +131,7 @@ The goal of this lab is to :
 - Run the Microservices a docker container within the Kubernetes/OpenShift platform,
 - Externalize the configuration using https://kubernetes.io/docs/user-guide/configmap/[Kubernetes Config Map]
 
-The project will contain 3 modules; a web static Front end, a backend service exposed by the Spring Boot Java Container and a MySQL database.
-
-The JPA layer is managed by Hibernate and with the help of Spring ORM.
-
-The front end is a AngularJS application.
+The project will contain 3 modules; a web static Front end, a backend service exposed by the Spring Boot Java Container and a MySQL database. The JPA layer is managed by Hibernate and with the help of Spring ORM. The front end is a AngularJS application.
 
 Each module will be packaged and deployed as a Docker image on OpenShift. The OpenShift Source to Image Tool (= https://docs.openshift.com/enterprise/3.2/creating_images/s2i.html[S2I]) will be used for that purpose.
 
@@ -144,8 +140,7 @@ It will use the Java S2I Docker image responsible to build the final Docker imag
 This step will be performed using the https://maven.fabric8.io/[Fabric8 Maven Plugin]. This Maven plugin is a Java Kubernetes/OpenShift client able to communicate with the OpenShift platform using the REST endpoints
 in order to issue the commands allowing to build aproject, deploy it and finally launch a docker process as a pod.
 
-The project will be developed using Java IDE Tool like "IntelliJ, JBoss Developer Studio" while the JBoss Forge tool will help us to design the Java application, add the required dependencies,
- populate the Hibernate in order to:
+The project will be developed using your favorite IDEA "IntelliJ, JBoss Developer Studio, .." while the JBoss Forge tool will help us to design the Java application, add the required dependencies, populate the Hibernate in order to:
 
 - Setup the database connection & JPA
 - Create the REST Service
