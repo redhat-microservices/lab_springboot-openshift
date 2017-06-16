@@ -758,19 +758,10 @@ to support this pattern by adding first an `HystrixCommand` and next to register
 The command contains 2 methods `run()` and `fallback()` which are used by the `HystrixServlet` with the help of a Java observable pattern. The method run will be called regularly to check if we get a response from the MySQL database,
 if this is the case, the fallback method will be called.
 
-The information (= events or hearbeat messages) created, are published by Hystrix regularly on the
-`Turbine` which will aggregate the information/events. It also allows to graphically display what happen within the different circuit breakers deployed (open/close status).
+The information which corresponds to the status of the Circuit Breaker created, are published by Hystrix regularly as stream of events that we can consult within the
+dashboard like also the open/close status.
 
-. Setup a Turbine server which is responsible to collect the events pushed by the Hystrix Commands
-+
-[source]
-----
-oc create -f http://repo1.maven.org/maven2/io/fabric8/kubeflix/turbine-server/1.0.28/turbine-server-1.0.28-openshift.yml
-oc policy add-role-to-user admin system:serviceaccount:workshop:turbine
-oc expose service turbine-server
-----
-
-. Then deploy a `Hystrix` Web dashboard from where we can consult the status of the circuit breakers.
+. Deploy a `Hystrix` Web dashboard using OpenShift command.
 +
 [source]
 ----
@@ -783,8 +774,8 @@ oc expose service hystrix-dashboard --port=8080
 +
 [source]
 ----
-project-add-dependencies org.springframework.cloud:spring-cloud-starter-kubernetes-netflix:0.2.0.BUILD-SNAPSHOT
 project-add-dependencies org.springframework.cloud:spring-cloud-starter-hystrix:1.2.7.RELEASE
+project-add-dependencies org.springframework.boot:spring-boot-starter-actuator:
 ----
 
 . Add the `hystrix.enabled` label to the service definition (src/main/fabric8/svc.yml) as this label will be used by the Fabric Hystrix pod to collect the info
@@ -808,6 +799,12 @@ spec:
       targetPort: 8080
   type: ClusterIP
 EOF
+----
+
+. Disable DB Health Check. So edit the ConfigMap and this line
++
+----
+    management.health.db.enabled=false
 ----
 
 . Add a `Hystrix` command within the `CatalogEndpoint` where you will define the run and fallback methods of the Circuit Breaker.
@@ -866,9 +863,10 @@ public class DemoApplication {
 mvn clean compile fabric8:deploy -Popenshift -DskipTests=true
 ----
 
-. Open the Hystrix dashboard to view the status of the circuit breaker. It should be `close`
+. Open the Hystrix dashboard and add the ADDRESS of the Cd service `http://cdservice-workshop.192.168.64.25.nip.io/hystrix.stream`
+  to view the status of the circuit breaker. It should be `close`
 +
-NOTe: Get the address of the dashboard using the command `oc get route/ --template='{{.spec.host}}'`
+NOTE: You can get the address of the dashboard using the command `oc get route/ --template='{{.spec.host}}'`
 
 . Scale down the database.
 +
