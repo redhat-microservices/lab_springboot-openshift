@@ -485,8 +485,6 @@ the Fabric8 Maven Plugin when the application will be deployed on Openshift.
 ----
 cd cdservice
 mkdir -p src/main/fabric8
-touch src/main/fabric8/configmap.yml
-
 cat << 'EOF' > src/main/fabric8/configmap.yml
 metadata:
   name: ${project.artifactId}
@@ -534,8 +532,6 @@ the key name is `cdservice`
 +
 [source]
 ----
-touch src/main/config-openshift/bootstrap.properties
-
 cat << 'EOF' > src/main/config-openshift/bootstrap.properties
 spring.application.name=cdservice
 EOF
@@ -555,8 +551,6 @@ oc policy add-role-to-user view -n $(oc project -q) -z default
 +
 [source,yaml]
 ----
-touch src/main/fabric8/route.yml
-
 cat << 'EOF' > src/main/fabric8/route.yml
 apiVersion: v1
 kind: Route
@@ -612,8 +606,6 @@ As the URL to access the service is specified within a `service.json` file, we w
 [source,yaml]
 ----
 mkdir -p src/main/fabric8/
-touch src/main/fabric8/svc.yml
-
 cat << 'EOF' > src/main/fabric8/svc.yml
 apiVersion: v1
 kind: Service
@@ -632,8 +624,6 @@ EOF
 +
 [source,yaml]
 ----
-touch src/main/fabric8/route.yml
-
 cat << 'EOF' > src/main/fabric8/route.yml
 apiVersion: v1
 kind: Route
@@ -690,8 +680,6 @@ scaffold-generate --provider AngularJS --generate-rest-resources --targets org.c
 
 [source,javascript]
 ----
-touch src/main/resources/static/services/config.js
-
 cat << 'EOF' > src/main/resources/static/scripts/services/config.js
 angular.module('cdservice').factory('config', function ($http, $q) {
   var deferred = $q.defer();
@@ -786,8 +774,6 @@ project-add-dependencies org.springframework.boot:spring-boot-starter-actuator:
 +
 [source,yaml]
 ----
-touch src/main/fabric8/svc.yml
-
 cat << 'EOF' > src/main/fabric8/svc.yml
 apiVersion: v1
 kind: Service
