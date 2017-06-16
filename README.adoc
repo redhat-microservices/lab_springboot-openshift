@@ -25,8 +25,10 @@ an Openshift platform running in the cloud.
 
 # Installation of OpenShift
 
-In order to use OpenShift platform on your laptop, we will use the Minishift Golang Application which has been created from the Minikube project of Kubernetes. It extends the features proposed by the Kubernetes client to package/deploy
-OpenShift within a Linux Virtual Machine. Different hypervisors are supported as Virtualbox, Xhyve & VMWare. You can find more information about Minishift like also how to install it from the project:
+In order to use OpenShift platform on your laptop, we will use the Minishift application which has been created from
+the Minikube project of Kubernetes. It extends the features proposed by the Kubernetes client to package/deploy
+OpenShift within a Linux Virtual Machine. Different hypervisors are supported as Virtualbox, Xhyve & VMWare. You can
+find more information about Minishift like also how to install it from the project:
 https://docs.openshift.org/latest/minishift/getting-started/installing.html
 
 To create the Virtual Machine, open a Terminal and execute this command to create it using VirtualBox as Hypervisor. The memory allocated to the instance and required is `3Gb`
@@ -257,8 +259,6 @@ rest-generate-endpoints-from-entities --targets org.cdservice.model.* --generato
 ----
 rest-new-cross-origin-resource-sharing-filter
 ----
-
-. Edit the class created to add the Spring annotation `@Component`
 
 ### Configure MySQL datasource
 
