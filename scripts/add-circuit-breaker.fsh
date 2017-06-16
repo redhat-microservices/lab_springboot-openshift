@@ -3,5 +3,4 @@ project-add-dependencies org.springframework.cloud:spring-cloud-starter-hystrix:
 project-add-dependencies org.springframework.boot:spring-boot-starter-actuator:
 
 # Add EnableCircuitBreaker annotation on DemoApplication
-java-add-annotation --annotation org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker
-\--target-class org.cdservice.DemoApplication"
+java-add-annotation --annotation org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker --target-class org.cdservice.DemoApplication
