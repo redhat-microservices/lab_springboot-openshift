@@ -783,7 +783,6 @@ oc expose service hystrix-dashboard --port=8080
 +
 [source]
 ----
-project-add-dependencies org.springframework.boot:spring-boot-starter-actuator:
 project-add-dependencies org.springframework.cloud:spring-cloud-starter-kubernetes-netflix:0.2.0.BUILD-SNAPSHOT
 project-add-dependencies org.springframework.cloud:spring-cloud-starter-hystrix:1.2.7.RELEASE
 ----
@@ -863,7 +862,7 @@ public class GetCatalogListCommand extends HystrixCommand<List> {
 EOF
 ----
 
-. Register the `GetCatalogListCommand` within the `src/main/java/org/cdservice/rest/CatalogEndpoint.java` class in order to use the Circuit Break.
+. Register the `GetCatalogListCommand` within the `src/main/java/org/cdservice/rest/CatalogEndpoint.java` class in order to use the Circuit Breaker.
 +
 [source,java]
 ----
