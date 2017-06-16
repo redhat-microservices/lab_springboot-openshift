@@ -84,3 +84,8 @@ while [ $(curl --write-out %{http_code} --silent --output /dev/null $APP/rest/ca
      echo "Wait till we get http response 200 .... from $APP/rest/catalogs"
      sleep 30
 done
+
+echo "##########################################################################"
+echo "#### Activate Circuit Breaker pattern and bring down MySQL instance       "
+echo "##########################################################################"
+./scripts/enable_circuit_breaker.sh $directory
