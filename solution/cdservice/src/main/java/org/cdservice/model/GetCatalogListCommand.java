@@ -33,6 +33,7 @@ public class GetCatalogListCommand extends HystrixCommand<List> {
         return findAllQuery.getResultList();
     }
 
+    @Override
     public List<Catalog> getFallback() {
         Catalog catalog = new Catalog();
         catalog.setArtist("Fallback");
