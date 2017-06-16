@@ -3,7 +3,8 @@ package org.cdservice.rest;
 import java.util.List;
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import java.util.Collections;
+import com.netflix.hystrix.exception.HystrixRuntimeException;
+
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.OptimisticLockException;
@@ -76,6 +77,8 @@ public class CatalogEndpoint {
 		}
 		return Response.ok(entity).build();
 	}
+
+	/*
 	@GET
 	@Produces("application/json")
 	@HystrixCommand(groupKey="CatalogGroup", fallbackMethod = "getFallback")
@@ -97,20 +100,29 @@ public class CatalogEndpoint {
 	    return list;
 	}
 
-/*	@GET
-	@Produces("application/json")
-	public List<Catalog> listAll(
-			@QueryParam("start") Integer startPosition,
-			@QueryParam("max") Integer maxResult) {
-		return new GetCatalogListCommand(em, startPosition, maxResult).execute();
-	}*/
-
-	@HystrixCommand
+	//@HystrixCommand
 	public List<Catalog> getFallback(Integer StartPosition, Integer maxResult) {
 		Catalog catalog = new Catalog();
 		catalog.setArtist("Fallback");
 		catalog.setTitle("Circuit breaker is open as the DB is down !");
 		return Collections.singletonList(catalog);
+	}*/
+
+	@GET
+	@Produces("application/json")
+	public List<Catalog> listAll(
+			@QueryParam("start") Integer startPosition,
+			@QueryParam("max") Integer maxResult) throws InterruptedException {
+		List<Catalog> list = null;
+		try {
+			list = new GetCatalogListCommand(em, startPosition, maxResult).execute();
+		} catch (HystrixRuntimeException e) {
+			if (e.getCause() instanceof InterruptedException) {
+				throw (InterruptedException) e.getCause();
+			}
+			System.out.println("problem with command: " + e.getMessage());
+		}
+		return list;
 	}
 
 	@PUT

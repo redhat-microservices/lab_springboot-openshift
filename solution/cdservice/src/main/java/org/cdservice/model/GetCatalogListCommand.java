@@ -1,25 +1,26 @@
 package org.cdservice.model;
 
-//import com.netflix.hystrix.HystrixCommand;
-//import com.netflix.hystrix.HystrixCommandGroupKey;
+import com.netflix.hystrix.HystrixCommand;
+import com.netflix.hystrix.HystrixCommandGroupKey;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import java.util.Collections;
 import java.util.List;
 import org.cdservice.model.Catalog;
 
-public class GetCatalogListCommand {
+public class GetCatalogListCommand extends HystrixCommand<List> {
     private final EntityManager em;
     private final Integer startPosition;
     private final Integer maxResult;
 
     public GetCatalogListCommand(EntityManager em, Integer startPosition, Integer maxResult) {
-        // super(HystrixCommandGroupKey.Factory.asKey("CatalogGroup"));
+        super(HystrixCommandGroupKey.Factory.asKey("CatalogGroup"));
         this.em = em;
         this.startPosition = startPosition;
         this.maxResult = maxResult;
     }
 
+    @Override
     public List<Catalog> run() {
         TypedQuery<Catalog> findAllQuery = em
                 .createQuery("SELECT DISTINCT c FROM Catalog c ORDER BY c.id", Catalog.class);
