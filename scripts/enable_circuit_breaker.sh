@@ -42,6 +42,6 @@ cp $SCRIPTS_DIR/service/CatalogEndpointCB.java src/main/java/org/cdservice/rest/
 mvn clean compile fabric8:deploy -Popenshift -DskipTests=true
 
 # Scale down the DB
-oc scale --replicas=0 dc mysql
+# oc scale --replicas=0 dc mysql
 
 cd $CURRENT
