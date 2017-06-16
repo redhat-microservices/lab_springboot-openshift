@@ -810,70 +810,42 @@ spec:
 EOF
 ----
 
-. Create a `Hystrix` command class where you will define the run and fallback methods of the Circuit Breaker.
+. Add a `Hystrix` command within the `CatalogEndpoint` where you will define the run and fallback methods of the Circuit Breaker.
+. Disable the @Transactional annotation
 . Register the command under the Group Key `CatalogGroup`
-. Return a list of catalog within the `run()` method.
-. Populate a dummy record within the `fallback()` method.
+. Populate a dummy record within the `fallback()` method when the circuit breaker will open
 +
 [source,java]
 ----
-touch src/main/java/org/cdservice/model/GetCatalogListCommand.java
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 
-cat << 'EOF' > src/main/java/org/cdservice/model/GetCatalogListCommand.java
-package org.cdservice.model;
+@Path("/catalogs")
+@Component
+//@Transactional
+public class CatalogEndpoint {
 
-import com.netflix.hystrix.HystrixCommand;
-import com.netflix.hystrix.HystrixCommandGroupKey;
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import java.util.Collections;
-import java.util.List;
-import org.cdservice.model.Catalog;
+	@GET
+	@Produces("application/json")
+	@HystrixCommand(groupKey="CatalogGroup", fallbackMethod = "getFallback")
+	public List<Catalog> listAll(@QueryParam("start") Integer startPosition, @QueryParam("max") Integer maxResult) {
+			TypedQuery<Catalog> findAllQuery = em
+					.createQuery("SELECT DISTINCT c FROM Catalog c ORDER BY c.id", Catalog.class);
+			if (startPosition != null) {
+				findAllQuery.setFirstResult(startPosition);
+			}
+			if (maxResult != null) {
+				findAllQuery.setMaxResults(maxResult);
+			}
+			return findAllQuery.getResultList();
+	}
 
-public class GetCatalogListCommand extends HystrixCommand<List> {
-    private final EntityManager em;
-    private final Integer startPosition;
-    private final Integer maxResult;
-
-    public GetCatalogListCommand(EntityManager em, Integer startPosition, Integer maxResult) {
-        super(HystrixCommandGroupKey.Factory.asKey("CatalogGroup"));
-        this.em = em;
-        this.startPosition = startPosition;
-        this.maxResult = maxResult;
-    }
-    public List<Catalog> run() {
-        TypedQuery<Catalog> findAllQuery = em
-                .createQuery("SELECT DISTINCT c FROM Catalog c ORDER BY c.id", Catalog.class);
-        if (startPosition != null) {
-            findAllQuery.setFirstResult(startPosition);
-        }
-        if (maxResult != null) {
-            findAllQuery.setMaxResults(maxResult);
-        }
-        return findAllQuery.getResultList();
-    }
-    public List<Catalog> getFallback() {
-        Catalog catalog = new Catalog();
-        catalog.setArtist("Fallback");
-        catalog.setTitle("Circuit breaker is open as the DB is down !");
-        return Collections.singletonList(catalog);
-    }
-}
-EOF
-----
-
-. Register the `GetCatalogListCommand` within the `src/main/java/org/cdservice/rest/CatalogEndpoint.java` class in order to use the Circuit Breaker.
-+
-[source,java]
-----
-import org.cdservice.model.GetCatalogListCommand;
-
-@GET
-@Produces("application/json")
-public List<Catalog> listAll(@QueryParam("start") Integer startPosition,
-			@QueryParam("max") Integer maxResult) {
-   return new GetCatalogListCommand(em, startPosition, maxResult).execute();
-}
+	public List<Catalog> getFallback(Integer StartPosition, Integer maxResult) {
+		Catalog catalog = new Catalog();
+		catalog.setArtist("Fallback");
+		catalog.setTitle("Circuit breaker is open as the DB is down !");
+		return Collections.singletonList(catalog);
+	}
 ----
 
 . Modify the `DemoApplication` class to add the `@EnableCircuitBreaker` annotation to let Spring to register the Circuit Breaker with Hystrix when it will be started
