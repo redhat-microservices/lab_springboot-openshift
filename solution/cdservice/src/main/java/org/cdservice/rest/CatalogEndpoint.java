@@ -2,6 +2,8 @@ package org.cdservice.rest;
 
 import java.util.List;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import java.util.Collections;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.OptimisticLockException;
@@ -20,9 +22,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
+import org.cdservice.model.Catalog;
+import org.cdservice.model.GetCatalogListCommand;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.cdservice.model.Catalog;
 
 /**
  *
@@ -31,6 +34,7 @@ import org.cdservice.model.Catalog;
 @Component
 @Transactional
 public class CatalogEndpoint {
+
 	@PersistenceContext
 	private EntityManager em;
 
@@ -38,9 +42,8 @@ public class CatalogEndpoint {
 	@Consumes("application/json")
 	public Response create(Catalog entity) {
 		em.persist(entity);
-		return Response.created(
-				UriBuilder.fromResource(CatalogEndpoint.class)
-						.path(String.valueOf(entity.getId())).build()).build();
+		return Response.created(UriBuilder.fromResource(CatalogEndpoint.class)
+				.path(String.valueOf(entity.getId())).build()).build();
 	}
 
 	@DELETE
@@ -56,17 +59,16 @@ public class CatalogEndpoint {
 
 	@GET
 	@Path("/{id:[0-9][0-9]*}")
-	@Produces("application/json")
-	public Response findById(@PathParam("id") Long id) {
-		TypedQuery<Catalog> findByIdQuery = em
-				.createQuery(
-						"SELECT DISTINCT c FROM Catalog c WHERE c.id = :entityId ORDER BY c.id",
-						Catalog.class);
+	@Produces("application/json") public Response findById(@PathParam("id") Long id) {
+		TypedQuery<Catalog> findByIdQuery = em.createQuery(
+				"SELECT DISTINCT c FROM Catalog c WHERE c.id = :entityId ORDER BY c.id",
+				Catalog.class);
 		findByIdQuery.setParameter("entityId", id);
 		Catalog entity;
 		try {
 			entity = findByIdQuery.getSingleResult();
-		} catch (NoResultException nre) {
+		}
+		catch (NoResultException nre) {
 			entity = null;
 		}
 		if (entity == null) {
@@ -74,28 +76,48 @@ public class CatalogEndpoint {
 		}
 		return Response.ok(entity).build();
 	}
-
 	@GET
 	@Produces("application/json")
-	public List<Catalog> listAll(@QueryParam("start") Integer startPosition,
+	@HystrixCommand(groupKey="CatalogGroup", fallbackMethod = "getFallback")
+	public List<Catalog> listAll(@QueryParam("start") Integer startPosition, @QueryParam("max") Integer maxResult) {
+		List<Catalog> list = null;
+        try {
+			TypedQuery<Catalog> findAllQuery = em
+					.createQuery("SELECT DISTINCT c FROM Catalog c ORDER BY c.id", Catalog.class);
+			if (startPosition != null) {
+				findAllQuery.setFirstResult(startPosition);
+			}
+			if (maxResult != null) {
+				findAllQuery.setMaxResults(maxResult);
+			}
+			list = findAllQuery.getResultList();
+		} catch (Exception e) {
+			throw new RuntimeException("JPA issue");
+		}
+	    return list;
+	}
+
+/*	@GET
+	@Produces("application/json")
+	public List<Catalog> listAll(
+			@QueryParam("start") Integer startPosition,
 			@QueryParam("max") Integer maxResult) {
-		TypedQuery<Catalog> findAllQuery = em
-				.createQuery("SELECT DISTINCT c FROM Catalog c ORDER BY c.id",
-						Catalog.class);
-		if (startPosition != null) {
-			findAllQuery.setFirstResult(startPosition);
-		}
-		if (maxResult != null) {
-			findAllQuery.setMaxResults(maxResult);
-		}
-		final List<Catalog> results = findAllQuery.getResultList();
-		return results;
+		return new GetCatalogListCommand(em, startPosition, maxResult).execute();
+	}*/
+
+	@HystrixCommand
+	public List<Catalog> getFallback(Integer StartPosition, Integer maxResult) {
+		Catalog catalog = new Catalog();
+		catalog.setArtist("Fallback");
+		catalog.setTitle("Circuit breaker is open as the DB is down !");
+		return Collections.singletonList(catalog);
 	}
 
 	@PUT
 	@Path("/{id:[0-9][0-9]*}")
 	@Consumes("application/json")
-	public Response update(@PathParam("id") Long id, Catalog entity) {
+	public Response update(
+			@PathParam("id") Long id, Catalog entity) {
 		if (entity == null) {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
@@ -110,9 +132,10 @@ public class CatalogEndpoint {
 		}
 		try {
 			entity = em.merge(entity);
-		} catch (OptimisticLockException e) {
-			return Response.status(Response.Status.CONFLICT)
-					.entity(e.getEntity()).build();
+		}
+		catch (OptimisticLockException e) {
+			return Response.status(Response.Status.CONFLICT).entity(e.getEntity())
+					.build();
 		}
 
 		return Response.noContent().build();
