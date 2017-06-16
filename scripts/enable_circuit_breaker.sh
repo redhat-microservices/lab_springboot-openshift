@@ -33,6 +33,7 @@ EOF
 
 cat << 'EOF' >> src/main/fabric8/configmap.yml
     management.health.db.enabled=false
+    management.security.enabled=false
 EOF
 
 # Replace CatalogEndpoint by modified version
