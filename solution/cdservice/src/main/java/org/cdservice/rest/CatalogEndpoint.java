@@ -3,7 +3,7 @@ package org.cdservice.rest;
 import java.util.List;
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import com.netflix.hystrix.exception.HystrixRuntimeException;
+import java.util.Collections;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -24,7 +24,6 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
 import org.cdservice.model.Catalog;
-import org.cdservice.model.GetCatalogListCommand;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Path("/catalogs")
 @Component
-@Transactional
+//@Transactional
 public class CatalogEndpoint {
 
 	@PersistenceContext
@@ -78,51 +77,27 @@ public class CatalogEndpoint {
 		return Response.ok(entity).build();
 	}
 
-	/*
+
 	@GET
 	@Produces("application/json")
 	@HystrixCommand(groupKey="CatalogGroup", fallbackMethod = "getFallback")
 	public List<Catalog> listAll(@QueryParam("start") Integer startPosition, @QueryParam("max") Integer maxResult) {
-		List<Catalog> list = null;
-        try {
-			TypedQuery<Catalog> findAllQuery = em
-					.createQuery("SELECT DISTINCT c FROM Catalog c ORDER BY c.id", Catalog.class);
-			if (startPosition != null) {
-				findAllQuery.setFirstResult(startPosition);
-			}
-			if (maxResult != null) {
-				findAllQuery.setMaxResults(maxResult);
-			}
-			list = findAllQuery.getResultList();
-		} catch (Exception e) {
-			throw new RuntimeException("JPA issue");
+		TypedQuery<Catalog> findAllQuery = em
+				.createQuery("SELECT DISTINCT c FROM Catalog c ORDER BY c.id", Catalog.class);
+		if (startPosition != null) {
+			findAllQuery.setFirstResult(startPosition);
 		}
-	    return list;
+		if (maxResult != null) {
+			findAllQuery.setMaxResults(maxResult);
+		}
+		return findAllQuery.getResultList();
 	}
 
-	//@HystrixCommand
 	public List<Catalog> getFallback(Integer StartPosition, Integer maxResult) {
 		Catalog catalog = new Catalog();
 		catalog.setArtist("Fallback");
 		catalog.setTitle("Circuit breaker is open as the DB is down !");
 		return Collections.singletonList(catalog);
-	}*/
-
-	@GET
-	@Produces("application/json")
-	public List<Catalog> listAll(
-			@QueryParam("start") Integer startPosition,
-			@QueryParam("max") Integer maxResult) throws InterruptedException {
-		List<Catalog> list = null;
-		try {
-			list = new GetCatalogListCommand(em, startPosition, maxResult).execute();
-		} catch (HystrixRuntimeException e) {
-			if (e.getCause() instanceof InterruptedException) {
-				throw (InterruptedException) e.getCause();
-			}
-			System.out.println("problem with command: " + e.getMessage());
-		}
-		return list;
 	}
 
 	@PUT
