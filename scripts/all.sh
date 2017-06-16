@@ -69,7 +69,7 @@ echo "##########################################################################
 ./scripts/create_cdstore.sh $directory
 
 echo "##########################################################################"
-echo "#### Call script to refactor projct and deploy it on Openshift            "
+echo "#### Call script to refactor project and deploy it on Openshift            "
 echo "##########################################################################"
 ./scripts/deploy_on_openshift.sh $directory
 
