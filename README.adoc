@@ -742,12 +742,15 @@ angular.module('cdservice').factory('CatalogResource', function ($resource, conf
 
 ## Enable circuit breaker
 
-Within this section, we will implement the circuit breaker pattern using https://github.com/Netflix/Hystrix[NetFlix Hystrix] project. The breaker will be developed within
-our `CatalogEndpoint` in order to send a dummy record to the front if the database is not longer available. We will extend the `cdservice` project
-to support this pattern by adding first an `HystrixCommand` and next to register it within the Endpoint class.
+Within this section, we will implement the circuit breaker pattern using
+https://github.com/Netflix/Hystrix[NetFlix Hystrix] project. The breaker will be developed within
+our `CatalogEndpoint` in order to send a dummy record to clients if the database is no longer available. We will
+extend the `cdservice` project to support this pattern by first adding an `HystrixCommand` and then register it
+with the `CatalogEndpoint` class.
 
-The command contains 2 methods `run()` and `fallback()` which are used by the `HystrixServlet` with the help of a Java observable pattern. The method run will be called regularly to check if we get a response from the MySQL database,
-if this is the case, the fallback method will be called.
+`HystrixCommand` defines 2 methods `run()` and `fallback()` which are called by the `HystrixServlet` via the Java
+observable pattern. `run` will be called regularly to check if we get a response from the MySQL database. If, for
+some reason, the database fails to answer, the `fallback` method will be called.
 
 The information which corresponds to the status of the Circuit Breaker created, are published by Hystrix regularly as stream of events that we can consult within the
 dashboard like also the open/close status.
@@ -760,8 +763,8 @@ oc create -f http://repo1.maven.org/maven2/io/fabric8/kubeflix/hystrix-dashboard
 oc expose service hystrix-dashboard --port=8080
 ----
 
-. Add the `Spring Boot Hystrix starter` to the pom.xml of the `cdservice` (pom.xml) project in order to use the Hystrix Java classes.
-  Execute this JBoss Forge command within the `cdservice` project
+. Add the `Spring Boot Hystrix starter` to the pom.xml of the so that the Hystrix classes are made available to the
+`cdservice` project. Execute this JBoss Forge command within the `cdservice` project
 +
 [source]
 ----
@@ -769,8 +772,8 @@ project-add-dependencies org.springframework.cloud:spring-cloud-starter-hystrix:
 project-add-dependencies org.springframework.boot:spring-boot-starter-actuator:
 ----
 
-. Add the `hystrix.enabled` label to the service definition (src/main/fabric8/svc.yml) as this label will be used by the Fabric Hystrix pod to collect the info
-  which are the events required to be send to the Turbine server to provide the status of the Circuit Breaker
+. Add the `hystrix.enabled` label to the service definition (`src/main/fabric8/svc.yml`) as this label will be used by
+ the Fabric Hystrix pod to collect the info which are the events required to be send to the Turbine server to provide the status of the Circuit Breaker
 +
 [source,yaml]
 ----
