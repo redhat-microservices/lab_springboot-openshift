@@ -25,8 +25,10 @@ an Openshift platform running in the cloud.
 
 # Installation of OpenShift
 
-In order to use OpenShift platform on your laptop, we will use the Minishift Golang Application which has been created from the Minikube project of Kubernetes. It extends the features proposed by the Kubernetes client to package/deploy
-OpenShift within a Linux Virtual Machine. Different hypervisors are supported as Virtualbox, Xhyve & VMWare. You can find more information about Minishift like also how to install it from the project:
+In order to use OpenShift platform on your laptop, we will use the Minishift application which has been created from
+the Minikube project of Kubernetes. It extends the features proposed by the Kubernetes client to package/deploy
+OpenShift within a Linux Virtual Machine. Different hypervisors are supported as Virtualbox, Xhyve & VMWare. You can
+find more information about Minishift like also how to install it from the project:
 https://docs.openshift.org/latest/minishift/getting-started/installing.html
 
 To create the Virtual Machine, open a Terminal and execute this command to create it using VirtualBox as Hypervisor. The memory allocated to the instance and required is `3Gb`
@@ -258,8 +260,6 @@ rest-generate-endpoints-from-entities --targets org.cdservice.model.* --generato
 rest-new-cross-origin-resource-sharing-filter
 ----
 
-. Edit the class created to add the Spring annotation `@Component`
-
 ### Configure MySQL datasource
 
 . To be able to use the project locally but also on OpenShift, we will define another datasource and JDBC driver to use MySQL that we will install on OpenShift.
@@ -485,8 +485,6 @@ the Fabric8 Maven Plugin when the application will be deployed on Openshift.
 ----
 cd cdservice
 mkdir -p src/main/fabric8
-touch src/main/fabric8/configmap.yml
-
 cat << 'EOF' > src/main/fabric8/configmap.yml
 metadata:
   name: ${project.artifactId}
@@ -534,8 +532,6 @@ the key name is `cdservice`
 +
 [source]
 ----
-touch src/main/config-openshift/bootstrap.properties
-
 cat << 'EOF' > src/main/config-openshift/bootstrap.properties
 spring.application.name=cdservice
 EOF
@@ -555,8 +551,6 @@ oc policy add-role-to-user view -n $(oc project -q) -z default
 +
 [source,yaml]
 ----
-touch src/main/fabric8/route.yml
-
 cat << 'EOF' > src/main/fabric8/route.yml
 apiVersion: v1
 kind: Route
@@ -612,8 +606,6 @@ As the URL to access the service is specified within a `service.json` file, we w
 [source,yaml]
 ----
 mkdir -p src/main/fabric8/
-touch src/main/fabric8/svc.yml
-
 cat << 'EOF' > src/main/fabric8/svc.yml
 apiVersion: v1
 kind: Service
@@ -632,8 +624,6 @@ EOF
 +
 [source,yaml]
 ----
-touch src/main/fabric8/route.yml
-
 cat << 'EOF' > src/main/fabric8/route.yml
 apiVersion: v1
 kind: Route
@@ -690,8 +680,6 @@ scaffold-generate --provider AngularJS --generate-rest-resources --targets org.c
 
 [source,javascript]
 ----
-touch src/main/resources/static/services/config.js
-
 cat << 'EOF' > src/main/resources/static/scripts/services/config.js
 angular.module('cdservice').factory('config', function ($http, $q) {
   var deferred = $q.defer();
@@ -754,12 +742,15 @@ angular.module('cdservice').factory('CatalogResource', function ($resource, conf
 
 ## Enable circuit breaker
 
-Within this section, we will implement the circuit breaker pattern using https://github.com/Netflix/Hystrix[NetFlix Hystrix] project. The breaker will be developed within
-our `CatalogEndpoint` in order to send a dummy record to the front if the database is not longer available. We will extend the `cdservice` project
-to support this pattern by adding first an `HystrixCommand` and next to register it within the Endpoint class.
+Within this section, we will implement the circuit breaker pattern using
+https://github.com/Netflix/Hystrix[NetFlix Hystrix] project. The breaker will be developed within
+our `CatalogEndpoint` in order to send a dummy record to clients if the database is no longer available. We will
+extend the `cdservice` project to support this pattern by first adding an `HystrixCommand` and then register it
+with the `CatalogEndpoint` class.
 
-The command contains 2 methods `run()` and `fallback()` which are used by the `HystrixServlet` with the help of a Java observable pattern. The method run will be called regularly to check if we get a response from the MySQL database,
-if this is the case, the fallback method will be called.
+`HystrixCommand` defines 2 methods `run()` and `fallback()` which are called by the `HystrixServlet` via the Java
+observable pattern. `run` will be called regularly to check if we get a response from the MySQL database. If, for
+some reason, the database fails to answer, the `fallback` method will be called.
 
 The information which corresponds to the status of the Circuit Breaker created, are published by Hystrix regularly as stream of events that we can consult within the
 dashboard like also the open/close status.
@@ -772,8 +763,8 @@ oc create -f http://repo1.maven.org/maven2/io/fabric8/kubeflix/hystrix-dashboard
 oc expose service hystrix-dashboard --port=8080
 ----
 
-. Add the `Spring Boot Hystrix starter` to the pom.xml of the `cdservice` (pom.xml) project in order to use the Hystrix Java classes.
-  Execute this JBoss Forge command within the `cdservice` project
+. Add the `Spring Boot Hystrix starter` to the pom.xml of the so that the Hystrix classes are made available to the
+`cdservice` project. Execute this JBoss Forge command within the `cdservice` project
 +
 [source]
 ----
@@ -781,13 +772,11 @@ project-add-dependencies org.springframework.cloud:spring-cloud-starter-hystrix:
 project-add-dependencies org.springframework.boot:spring-boot-starter-actuator:
 ----
 
-. Add the `hystrix.enabled` label to the service definition (src/main/fabric8/svc.yml) as this label will be used by the Fabric Hystrix pod to collect the info
-  which are the events required to be send to the Turbine server to provide the status of the Circuit Breaker
+. Add the `hystrix.enabled` label to the service definition (`src/main/fabric8/svc.yml`) as this label will be used by
+ the Fabric Hystrix pod to collect the info which are the events required to be send to the Turbine server to provide the status of the Circuit Breaker
 +
 [source,yaml]
 ----
-touch src/main/fabric8/svc.yml
-
 cat << 'EOF' > src/main/fabric8/svc.yml
 apiVersion: v1
 kind: Service
