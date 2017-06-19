@@ -26,6 +26,18 @@ oc new-app --template=mysql-persistent \
 #     -p MYSQL_PASSWORD=mysql \
 #     -p MYSQL_DATABASE=catalogdb
 
+# MySQL init based on https://github.com/VeerMuchandi/database-initialization
+export escapedQuery=$(sed -e 's:":\\\\":g' $SCRIPTS_DIR/service/data-mysql.sql | tr -d '\n' | tr -s ' ')
+eval $(sed -e "s/\$MYQUERY/$escapedQuery/" $SCRIPTS_DIR/db_patch.sh)
+# wait for changes to take place
+sleep 20
+
+# update DB settings and wait for changes to take place
+oc rollout latest mysql
+sleep 20
+
+
+
 echo "##########################################"
 echo "Create missing files, deps (bootstrap.properties/service & route)"
 echo "##########################################"
@@ -33,7 +45,7 @@ cd cdservice
 
 mkdir -p src/main/config-local
 mkdir -p src/main/config-openshift
-cp $SCRIPTS_DIR/service/data-mysql.sql src/main/config-openshift/data.sql
+#cp $SCRIPTS_DIR/service/data-mysql.sql src/main/config-openshift/data.sql
 mv src/main/resources/application.properties src/main/config-local
 mv src/main/resources/data.sql src/main/config-local
 
@@ -64,7 +76,7 @@ data:
     spring.jpa.properties.hibernate.transaction.flush_before_completion=true
     spring.jpa.properties.hibernate.show_sql=true
     spring.jpa.properties.hibernate.format_sql=true
-    spring.jpa.properties.hibernate.hbm2ddl.auto=create-drop
+    spring.jpa.properties.hibernate.hbm2ddl.auto=validate
     spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
 EOF
 
