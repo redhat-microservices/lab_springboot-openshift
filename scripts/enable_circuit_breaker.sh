@@ -40,6 +40,8 @@ EOF
 cp $SCRIPTS_DIR/service/CatalogEndpointCB.java src/main/java/org/cdservice/rest/CatalogEndpoint.java
 
 # Redeploy cdservice
+mvn fabric8:undeploy
+sleep 1m
 mvn clean compile fabric8:deploy -Popenshift -DskipTests=true
 
 # Scale down the DB
