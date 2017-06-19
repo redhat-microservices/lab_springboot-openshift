@@ -20,6 +20,12 @@ oc new-app --template=mysql-persistent \
     -p MYSQL_PASSWORD=mysql \
     -p MYSQL_DATABASE=catalogdb
 
+# oc create -f https://raw.githubusercontent.com/openshift/origin/v1.5.1/examples/db-templates/mysql-ephemeral-template.json
+# oc new-app --template=mysql-ephemeral \
+#     -p MYSQL_USER=mysql \
+#     -p MYSQL_PASSWORD=mysql \
+#     -p MYSQL_DATABASE=catalogdb
+
 echo "##########################################"
 echo "Create missing files, deps (bootstrap.properties/service & route)"
 echo "##########################################"
