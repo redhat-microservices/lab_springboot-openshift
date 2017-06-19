@@ -1,0 +1,1 @@
+oc patch dc mysql -p '{"spec":{"strategy":{"rollingParams":{"post":{"failurePolicy": "ignore","execNewPod":{"containerName":"mysql","command":["/bin/sh","-c","hostname&&sleep 10&&echo $QUERY | /opt/rh/rh-mysql57/root/usr/bin/mysql -h $MYSQL_SERVICE_HOST -u $MYSQL_USER -D $MYSQL_DATABASE -p$MYSQL_PASSWORD -P3306"], "env": [{"name": "QUERY", "value":"$MYQUERY"}]}}}}}}'
