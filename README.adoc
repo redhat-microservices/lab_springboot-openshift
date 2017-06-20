@@ -793,10 +793,11 @@ spec:
 EOF
 ----
 
-. Disable DB Health Check. So edit the ConfigMap and this line
+. Disable DB Health Check like the security if you want to monitor the circuit using actuator. So edit the ConfigMap file and append these lines
 +
 ----
     management.health.db.enabled=false
+    management.security.enabled=false
 ----
 
 . Add a `Hystrix` command within the `CatalogEndpoint` where you will define the run and fallback methods of the Circuit Breaker.
@@ -855,11 +856,20 @@ public class DemoApplication {
 mvn clean compile fabric8:deploy -Popenshift -DskipTests=true
 ----
 
-. Open the Hystrix dashboard and add the ADDRESS of the Cd service `http://cdservice-workshop.192.168.64.25.nip.io/hystrix.stream`
-  to view the status of the circuit breaker. It should be `close`
+. Open the Hystrix dashboard and add the ADDRESS of the cdservice `http://cdservice-workshop.192.168.64.25.nip.io/hystrix.stream`
+  to view the status of the circuit breaker. It should be `closed`
 +
 NOTE: You can get the address of the dashboard using the command `oc get route/ --template='{{.spec.host}}'`
 
+. Within a terminal, issue several requests to call the service and scale down the mysql service after a few requests in order to see status changing within the dashboard from `close` to `open`.
++
+[source]
+----
+export ENDPOINT=http://cdservice-workshop.192.168.64.25.nip.io
+curl $ENDPOINT/rest/catalogs
+for i in `seq 1 100`; do curl $ENDPOINT/rest/catalogs; done
+----
++
 . Scale down the database.
 +
 [source]
@@ -867,10 +877,7 @@ NOTE: You can get the address of the dashboard using the command `oc get route/ 
 oc scale --replicas=0 dc mysql
 ----
 
-. Refresh the CD Front and click on the `catalog` button. A record will be displayed with the info `This is a fallback record`
-
-. Go back to the `Hystrix dashboard` to verify that the status of the circuit breaker is `open` now.
-
+NOTE: Refresh the CD Front and click on the `catalog` button. A record will be displayed with the info `This is a fallback record`
 INFO: You can read more about Hystrix https://github.com/Netflix/Hystrix/wiki/How-it-Works[here].
 
 ## Tricks
