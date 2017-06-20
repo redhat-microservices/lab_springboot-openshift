@@ -492,7 +492,7 @@ data:
 EOF
 ----
 
-. Copy the content of the `application.properties` file within the `config.yaml` file after the key `data:` and next delete it
+. Move the content of the `application.properties` file within the `config.yaml` file after the key `data:` and next delete it
 +
 [source,yaml]
 ----
