@@ -861,6 +861,9 @@ mvn clean compile fabric8:deploy -Popenshift -DskipTests=true
   to view the status of the circuit breaker. It should be `closed`
 +
 NOTE: You can get the address of the dashboard using the command `oc get route/ --template='{{.spec.host}}'`
++
+WARNING: If you use an ephemeral MySQL database, then it will be required to create manually the DB an insert the records. You can use
+the content of the data.sql to copy/paste it within your mysql pod as we did before !
 
 . Within a terminal, issue several requests to call the service and scale down the mysql service after a few requests in order to see status changing within the dashboard from `close` to `open`.
 +
