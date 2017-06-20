@@ -649,7 +649,7 @@ fabric8-setup --integration-test=false
 +
 [source]
 ----
-mvn fabric8:deploy
+mvn clean compile fabric8:deploy
 ----
 
 . Retrieve the address of the `cdfront` using the command `oc get route/cdfront --template='{{.spec.host}}'`
