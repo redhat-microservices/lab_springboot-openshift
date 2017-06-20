@@ -448,7 +448,8 @@ oc new-app --template=mysql-persistent \
 ----
 
 WARNING: If you deploy your project on GCP, it is not possible to use persistent volume and then you must install the ephemeral mysql DB
-using this command `oc create -f https://raw.githubusercontent.com/openshift/origin/v1.5.1/examples/db-templates/mysql-ephemeral-template.json`
+using this command 
+`oc new-app --template=mysql-ephemeral -p MYSQL_USER=mysql -p MYSQL_PASSWORD=mysql -p MYSQL_DATABASE=catalogdb`
 
 . Next, check if the Database is up and alive and connect to the pod to execute SQL commands
 +
