@@ -512,7 +512,6 @@ data:
     spring.jpa.properties.hibernate.format_sql=true
     spring.jpa.properties.hibernate.hbm2ddl.auto=create-drop
     spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
-EOF
 ----
 
 NOTE: As you can see, the hostname defined for the connection-url corresponds to the `mysql` service published on OpenShift (`oc get svc/mysql`).
