@@ -30,13 +30,13 @@ OpenShift within a Linux Virtual Machine. Different hypervisors are supported as
 find more information about Minishift like also how to install it from the project:
 https://docs.openshift.org/latest/minishift/getting-started/installing.html
 
-To create the Virtual Machine, open a Terminal and execute this command to create it using VirtualBox as Hypervisor. The memory allocated to the instance and required is `3Gb`
+To create the Virtual Machine, open a Terminal and execute this command to create it using VirtualBox as Hypervisor. The memory allocated to the instance and required is `4Gb`
 
 NOTE: If you have installed xhyve on your laptop, you can remove the `--vm-driver` parameter from the command line
 
 [source,shell]
 ----
-minishift config set memory 3000
+minishift config set memory 4000
 minishift config set vm-driver virtualbox
 
 minishift start
