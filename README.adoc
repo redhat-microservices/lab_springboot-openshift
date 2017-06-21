@@ -20,7 +20,7 @@ You will need to install the following on your machine:
 - [x] http://developers.redhat.com/products/devstudio/download/?referrer=jbd[JBoss Developer Studio 10 (optional)]
 - [x] http://github.com/openshift/origin/releases/tag/v1.5.0[OpenShift Client 1.5.0 (optional)]
 
-NOTE: If you don't have enough memory on your machine to launch a Hypervisor with Minishift, then ask to the instructor to https://goo.gl/1UmVag[have access] to an Openshift platform running in the cloud.
+NOTE: If you don't have enough memory on your machine to launch a Hypervisor with Minishift, then ask to the instructor to https://docs.google.com/spreadsheets/d/1tO5KYSaJtoO1em1A2wnIvJnm7SkIzLihLfU7kFSCRDQ/edit?usp=sharing[have access] to an Openshift platform running in the cloud.
 
 # Installation of OpenShift
 
