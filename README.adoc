@@ -90,6 +90,8 @@ Starting local OpenShift cluster using 'virtualbox' hypervisor...
 
 The OpenShift client is packaged within the Minishift distribution since the version 1.1.0. So, execute this `minishift oc-env` to display the command you need to type into your shell in order to add the `oc` binary to your `PATH`. The output of oc-env will differ depending on OS and shell type.
 
+WARNING: The openshift client or oc is mandatory for the workshop/lab even if you will not run locally OpenShift !
+
 Now you should be able to log on to your Openshift platform usign the command
 
 ----
