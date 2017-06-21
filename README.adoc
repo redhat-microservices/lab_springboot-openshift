@@ -4,9 +4,39 @@
 :toc-title: Table of Content
 :numbered:
 
-= Hands On Lab with Spring Boot & OpenShift
+= Hands On Lab on Spring Boot & OpenShift
 
 toc::[]
+
+# Goals
+
+The goal of this lab is to :
+
+- Create a Microservices project composed of an AngularJS Web Front end, a backend application connected to a MySQL database,
+- Use Spring Boot technology to design/run the Static Web application and the Java JPA backend,
+- Simplify the development of the application, your devtools experience using JBoss Forge,
+- Implements the circuit broker pattern,
+- Package/Deploy the project on OpenShift,
+- Run the Microservices a docker container within the Kubernetes/OpenShift platform,
+- Externalize the configuration using https://kubernetes.io/docs/user-guide/configmap/[Kubernetes Config Map]
+
+The project will contain 3 modules; a web static Front end, a backend service exposed by the Spring Boot Java Container and a MySQL database. The JPA layer is managed by Hibernate and with the help of Spring ORM. The front end is a AngularJS application.
+
+image::application.png[width="80%"]
+
+Each module will be deployed as a Docker image on OpenShift. The OpenShift Source to Image Tool (= https://docs.openshift.com/enterprise/3.2/creating_images/s2i.html[S2I]) will be used for that purpose.
+It will use the Java S2I Docker image responsible to build the final Docker image of your project using the source code of the maven module uploaded to the openshift platform.
+
+This step will be performed using the https://maven.fabric8.io/[Fabric8 Maven Plugin]. This Maven plugin is a Java Kubernetes/OpenShift client able to communicate with the OpenShift platform using the REST endpoints
+in order to issue the commands allowing to build aproject, deploy it and finally launch a docker process as a pod.
+
+The project will be developed using your favorite IDEA "IntelliJ, JBoss Developer Studio, .." while the JBoss Forge tool will help us to design the Java application, add the required dependencies, populate the Hibernate in order to:
+
+- Setup the database connection & JPA
+- Create the REST Service
+- Create the Entity & fields
+- Scaffold the AngularJS application (optional)
+
 
 # Prerequisites
 
@@ -22,7 +52,9 @@ You will need to install the following on your machine:
 
 NOTE: If you don't have enough memory on your machine to launch a Hypervisor with Minishift, then ask to the instructor to https://docs.google.com/spreadsheets/d/1tO5KYSaJtoO1em1A2wnIvJnm7SkIzLihLfU7kFSCRDQ/edit?usp=sharing[have access] to an Openshift platform running in the cloud.
 
-# Installation of OpenShift
+# Installation
+
+## OpenShift using Minishift
 
 In order to use OpenShift platform on your laptop, we will use the Minishift application which has been created from
 the Minikube project of Kubernetes. It extends the features proposed by the Kubernetes client to package/deploy
@@ -111,7 +143,7 @@ oc login -u admin -p admin
 oc project default
 ----
 
-# Configuration of JBoss Forge tool
+## Configuration of JBoss Forge tool
 
 In order to use JBoss Forge with this lab, 2 addons should be installed to create a `Spring Boot` project, generate the code and deploy it on the OpenShift platform using the Fabric8 maven plugin.
 
@@ -121,35 +153,6 @@ brew install jboss-forge
 forge -i io.fabric8.forge:devops,2.3.88
 forge -i org.jboss.forge.addon:spring-boot,1.0.0.Alpha4
 ----
-
-# Goals
-
-The goal of this lab is to :
-
-- Create a Microservices project composed of an AngularJS Web Front end, a backend application connected to a MySQL database,
-- Use Spring Boot technology to design/run the Static Web application and the Java JPA backend,
-- Simplify the development of the application, your devtools experience using JBoss Forge,
-- Implements the circuit broker pattern,
-- Package/Deploy the project on OpenShift,
-- Run the Microservices a docker container within the Kubernetes/OpenShift platform,
-- Externalize the configuration using https://kubernetes.io/docs/user-guide/configmap/[Kubernetes Config Map]
-
-The project will contain 3 modules; a web static Front end, a backend service exposed by the Spring Boot Java Container and a MySQL database. The JPA layer is managed by Hibernate and with the help of Spring ORM. The front end is a AngularJS application.
-
-image::application.png[width="80%"]
-
-Each module will be deployed as a Docker image on OpenShift. The OpenShift Source to Image Tool (= https://docs.openshift.com/enterprise/3.2/creating_images/s2i.html[S2I]) will be used for that purpose.
-It will use the Java S2I Docker image responsible to build the final Docker image of your project using the source code of the maven module uploaded to the openshift platform.
-
-This step will be performed using the https://maven.fabric8.io/[Fabric8 Maven Plugin]. This Maven plugin is a Java Kubernetes/OpenShift client able to communicate with the OpenShift platform using the REST endpoints
-in order to issue the commands allowing to build aproject, deploy it and finally launch a docker process as a pod.
-
-The project will be developed using your favorite IDEA "IntelliJ, JBoss Developer Studio, .." while the JBoss Forge tool will help us to design the Java application, add the required dependencies, populate the Hibernate in order to:
-
-- Setup the database connection & JPA
-- Create the REST Service
-- Create the Entity & fields
-- Scaffold the AngularJS application (optional)
 
 # Project creation
 
