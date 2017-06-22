@@ -229,7 +229,7 @@ To quit the shell, type 'exit'.
 NOTE: A Forge command can be executed within the Forge shell or from the terminal (bash shell). In this case, the command to be executed is defined as such
       `forge -e "abc"` where `abc` corresponds to a Forge command.
 
-INFO: By convention, all the bash shell commands defined within this lab are prefixed with the `$` symbol while the forge commands no.
+WARNING: By convention, all the bash shell commands defined within this lab are prefixed with the `$` symbol while the forge commands no.
 
 . Setup the JPA project using a `H2` database.
 If no database type is specified then `H2` is selected by default. The JBoss Forge command will add a maven GAV H2 artifact and will fill the application.properties file with the Hibernate properties. No datasource is predefined here as we will only use H2 in memory. Note that this command should be executed within the `cdservice` folder, which should be automatically selected after creating the new project.
