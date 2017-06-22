@@ -214,6 +214,7 @@ project-new --named cdservice --type spring-boot
 
 NOTE: A Forge command can be executed within the Forge shell or from the terminal (bash shell). In this case, the command to be executed is defined as such
       `forge -e "abc"` where `abc` corresponds to a Forge command.
+
 INFO: By convention, all the bash shell commands defined within this lab are prefixed with the `$` symbol while the forge commands no.
 
 . Setup the JPA project using a `H2` database.
