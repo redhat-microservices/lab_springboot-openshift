@@ -236,7 +236,7 @@ If no database type is specified then `H2` is selected by default. The JBoss For
 +
 [source,shell]
 ----
-jpa-setup
+[red]#jpa-setup#
 ----
 
 . This command will generate the properties used to configure the Hibernate framework and to access the database
