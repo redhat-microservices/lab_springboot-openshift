@@ -209,6 +209,20 @@ $ mv project workshop && cd workshop
 +
 [source,bash]
 ----
+Using Forge at /usr/local/Cellar/jboss-forge/3.7.0.Final/libexec
+
+    _____
+   |  ___|__  _ __ __ _  ___
+   | |_ / _ \| `__/ _` |/ _ \  \\
+   |  _| (_) | | | (_| |  __/  //
+   |_|  \___/|_|  \__, |\___|
+                   |__/
+
+JBoss Forge, version [ 3.7.0.Final ] - JBoss, by Red Hat, Inc. [ http://forge.jboss.org ]
+Hit '<TAB>' for a list of available commands and 'man [cmd]' for help on a specific command.
+
+To quit the shell, type 'exit'.
+
 project-new --named cdservice --type spring-boot
 ----
 
