@@ -160,11 +160,11 @@ The first thing to be done is to git clone locally the project
 . Open a terminal where you will create the `workshop` project
 . Git clone the project
 
-  git clone https://github.com/redhat-microservices/lab_springboot-openshift.git
+  $ git clone https://github.com/redhat-microservices/lab_springboot-openshift.git
 
 . Change to the directory of the cloned git repository
 
-  cd lab_springboot-openshift
+  $ cd lab_springboot-openshift
 
 ## Decomposed steps
 
