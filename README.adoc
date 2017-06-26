@@ -819,7 +819,14 @@ EOF
     management.health.db.enabled=false
     management.security.enabled=false
 ----
-
++
+. Change Hystrix parameters to narrow the window used by Hystrix to detect when the circuit is opened usign the streqm
++
+----
+hystrix.command.default.circuitBreaker.requestVolumeThreshold=3
+hystrix.command.default.metrics.healthSnapshot.intervalInMilliseconds=100
+----
++
 . Add a `Hystrix` command within the `CatalogEndpoint` where you will define the run and fallback methods of the Circuit Breaker.
 . Disable the @Transactional annotation
 . Register the command under the Group Key `CatalogGroup`
@@ -892,7 +899,7 @@ the content of the data.sql to copy/paste it within your mysql pod as we did bef
 ----
 $ export ENDPOINT=http://cdservice-workshop.192.168.64.25.nip.io
 $ curl $ENDPOINT/rest/catalogs
-$ for i in `seq 1 100`; do curl $ENDPOINT/rest/catalogs; done
+$ for i in `seq 1 50`; do curl $ENDPOINT/rest/catalogs; done
 ----
 +
 . Scale down the database.
