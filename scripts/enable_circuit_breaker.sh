@@ -34,6 +34,8 @@ EOF
 cat << 'EOF' >> src/main/fabric8/configmap.yml
     management.health.db.enabled=false
     management.security.enabled=false
+    hystrix.command.default.circuitBreaker.requestVolumeThreshold=3
+    hystrix.command.default.metrics.healthSnapshot.intervalInMilliseconds=100
 EOF
 
 # Replace CatalogEndpoint by modified version
@@ -42,7 +44,8 @@ cp $SCRIPTS_DIR/service/CatalogEndpointCB.java src/main/java/org/cdservice/rest/
 # Redeploy cdservice
 mvn clean compile fabric8:deploy -Popenshift -DskipTests=true
 
-# Scale down the DB
-# oc scale --replicas=0 dc mysql
+sleep 10
+
+$SCRIPTS_DIR/load_and_break_service.sh
 
 cd $CURRENT
