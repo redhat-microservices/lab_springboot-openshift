@@ -63,6 +63,9 @@ echo "##########################################################################
 oc new-project workshop
 oc policy add-role-to-user view -n $(oc project -q) -z default
 
+forge -i io.fabric8.forge:devops,2.3.88
+forge -i org.jboss.forge.addon:spring-boot,1.0.0.Alpha4
+
 echo "##########################################################################"
 echo "#### Call script to create cdservice & cdfront for local usage            "
 echo "##########################################################################"
