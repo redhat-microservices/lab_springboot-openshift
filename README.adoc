@@ -816,8 +816,8 @@ EOF
 . Disable DB Health Check like the security if you want to monitor the circuit using actuator. So edit the ConfigMap file and append these lines
 +
 ----
-    management.health.db.enabled=false
-    management.security.enabled=false
+management.health.db.enabled=false
+management.security.enabled=false
 ----
 +
 . Change Hystrix parameters to narrow the window used by Hystrix to detect when the circuit is opened usign the streqm

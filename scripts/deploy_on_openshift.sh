@@ -15,10 +15,6 @@ cd $PROJECT_DIR
 echo "#########################################################"
 echo "Add mysql persistent template and deploy the MySQL Server "
 echo "#########################################################"
-#oc new-app --template=mysql-persistent \
-#    -p MYSQL_USER=mysql \
-#    -p MYSQL_PASSWORD=mysql \
-#    -p MYSQL_DATABASE=catalogdb
 oc create -f $SCRIPTS_DIR/service/mysql-persistent-template-with-init.json
 oc new-app --template=mysql-persistent-with-init \
     -p MYSQL_USER=mysql \
@@ -31,16 +27,6 @@ oc new-app --template=mysql-persistent-with-init \
 #     -p MYSQL_PASSWORD=mysql \
 #     -p MYSQL_DATABASE=catalogdb
 
-# MySQL init based on https://github.com/VeerMuchandi/database-initialization
-#export escapedQuery=$(sed -e 's:":\\\\":g' $SCRIPTS_DIR/service/data-mysql.sql | tr -d '\n' | tr -s ' ')
-#eval $(sed -e "s/\$MYQUERY/$escapedQuery/" $SCRIPTS_DIR/db_patch.sh)
-# wait for changes to take place
-#sleep 20
-
-# update DB settings and wait for changes to take place
-#oc rollout latest mysql
-#sleep 20
-
 
 
 echo "##########################################"
@@ -50,7 +36,6 @@ cd cdservice
 
 mkdir -p src/main/config-local
 mkdir -p src/main/config-openshift
-#cp $SCRIPTS_DIR/service/data-mysql.sql src/main/config-openshift/data.sql
 mv src/main/resources/application.properties src/main/config-local
 mv src/main/resources/data.sql src/main/config-local
 
